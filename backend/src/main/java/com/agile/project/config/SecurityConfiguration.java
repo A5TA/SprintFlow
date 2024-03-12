@@ -30,8 +30,9 @@ public class SecurityConfiguration {
         // Spring Security updated, so I needed to reference this way of handling authentication : https://stackoverflow.com/questions/74683225/updating-to-spring-security-6-0-replacing-removed-and-deprecated-functionality
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
