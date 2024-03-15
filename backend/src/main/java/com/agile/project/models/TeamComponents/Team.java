@@ -1,10 +1,13 @@
 package com.agile.project.models.TeamComponents;
 
+import com.agile.project.models.ProjectComponents.Project;
 import com.agile.project.models.UserComponents.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data //Generates Getters and Setters
@@ -23,4 +26,6 @@ public class Team {
     @ManyToMany(mappedBy = "teams", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<User> users;
 
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    private List<Project> projects = new ArrayList<Project>();
 }
