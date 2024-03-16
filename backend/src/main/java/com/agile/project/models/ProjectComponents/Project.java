@@ -25,7 +25,7 @@ public class Project {
     private Date startDate;
     private Date endDate;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<Task> tasks = new ArrayList<Task>();
 //    private int points;
 
