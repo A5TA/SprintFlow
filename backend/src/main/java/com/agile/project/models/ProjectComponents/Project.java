@@ -2,6 +2,9 @@ package com.agile.project.models.ProjectComponents;
 
 import com.agile.project.models.TaskComponents.Task;
 import com.agile.project.models.TeamComponents.Team;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
