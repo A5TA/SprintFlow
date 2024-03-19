@@ -28,7 +28,6 @@ public class TeamController {
         }
     }
 
-    @Transactional
     @PostMapping(value = "/addUserToTeam/{teamName}")
     public ResponseEntity<String> saveUserWithTeam(@PathVariable String teamName) {
         try {

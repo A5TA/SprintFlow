@@ -2,6 +2,9 @@ package com.agile.project.models.TaskComponents;
 
 import com.agile.project.models.ProjectComponents.Project;
 import com.agile.project.models.UserComponents.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +34,19 @@ public class Task {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY) //lazy loading the relationship with the user
     @JoinColumn(name = "project_id")
     private Project project;
+
+    //required for testing
+//    @Override
+//    public String toString() {
+//        return "Task{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+//                '}';
+//    }
 
 }
