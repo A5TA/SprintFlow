@@ -10,6 +10,8 @@ import Calendar from "./routes/calendar"
 import CTeam from "./routes/createTeam";
 import Login from "./routes/login";
 import Register from "./routes/register";
+import CProject from "./routes/createProject";
+import CTasks from "./routes/tasks";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +33,14 @@ const router = createBrowserRouter([
   {
     path: "/register", 
     element: <Register/>
+  },
+  {
+    path: "/createProject", 
+    element: <CProject/>
+  },
+  {
+    path: "/createTask", 
+    element: <CTasks/>
   },
 ]);
 

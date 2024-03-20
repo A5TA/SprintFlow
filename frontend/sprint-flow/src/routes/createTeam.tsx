@@ -3,20 +3,16 @@ import React, { useState, useEffect } from 'react';
 
 export default function CTeam() {
   const [name, setName] = useState("");
-
-  // useEffect hook to log the name when it changes
-  useEffect(() => {
-    console.log(name);
-  }, [name]);
-
+  
   const onChange = (event: any) => {
     setName(event.target.value);
   }
 
-  const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0aW5nMUBnbWFpbC5jb20iLCJpYXQiOjE3MTA0NDMyMzcsImV4cCI6MTcxMDQ0NDY3N30.pg4902Msef8n8B01Y8UpR8xzHKKwJwxUIuGwHhG-wkQ"; // Replace with your actual token
+  
 
   const sendReq = (event: any) => {
     event.preventDefault(); 
+    const token = localStorage.getItem('token');
 
     const config = {
       headers: { 

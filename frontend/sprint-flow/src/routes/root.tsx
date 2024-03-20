@@ -14,6 +14,12 @@ return(
     <li>
         <Link to="/register">Register</Link>
     </li>
+    <li>
+        <Link to="/createProject">Create Project</Link>
+    </li>
+    <li>
+        <Link to="/createTask">Create Task</Link>
+    </li>
     </div>
 )
 }
