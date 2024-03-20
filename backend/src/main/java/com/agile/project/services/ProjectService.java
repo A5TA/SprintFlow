@@ -46,7 +46,7 @@ public class ProjectService {
             //we need to get the current teams the user has then added the new team to them and update both the mapping repo and team repo
             team.getProjects().add(project);
             projectRepository.save(project); //save the new project to the database
-            return "The Project with name " + projectRequest.getTeamName() + " has been created!";
+            return "The Project with name " + projectRequest.getName() + " has been created!";
         } catch (DataIntegrityViolationException ex) {
             throw new DataIntegrityViolationException("Project with this name already made");
         }
