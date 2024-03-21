@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -50,5 +52,19 @@ public class ProjectService {
         } catch (DataIntegrityViolationException ex) {
             throw new DataIntegrityViolationException("Project with this name already made");
         }
+    }
+
+    //Find the team to ensure it exists then using that team object find all the projects that are assosiated with that team and return that list
+    public List<Project> getAllProjectsForTeam(String teamName) {
+        Team team = teamRepository.findByName(teamName); //we need to make sure the team exists
+        if (team == null) {
+            throw new DataIntegrityViolationException("Team with name '" + teamName + "' not found");
+        }
+
+        List<Project> projects = projectRepository.findByTeam(team); //this returns all projects for that team
+        if (projects == null) {
+            return List.of();
+        }
+        return new ArrayList<>(projects);
     }
 }
