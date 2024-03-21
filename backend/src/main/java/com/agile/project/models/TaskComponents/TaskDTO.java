@@ -12,6 +12,7 @@ public class TaskDTO {
     private Integer id;
     private String name;
     private String description;
+    private Date startDate;
     private Date dueDate;
     private int points;
     private TaskStatus taskStatus;

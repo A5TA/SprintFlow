@@ -16,6 +16,7 @@ import java.util.Date;
 public class TaskUpdateRequest {
     String name;
     String desc;
+    Date startDate;
     Date dueDate;
     int points;
     String taskStatus;
