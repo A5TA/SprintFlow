@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class TaskService {
                 .name(taskRequest.getName())
                 .description(taskRequest.getDesc())
                 .points(taskRequest.getPoints())
+                .startDate(taskRequest.getStartDate())
                 .dueDate(taskRequest.getDueDate())
                 .taskStatus(TaskStatus.NOTSTARTED)
                 .user(currentUser) //this task is being created not assigned yet
@@ -126,6 +128,9 @@ public class TaskService {
         if (request.getDueDate() != null) {
             task.setDueDate(request.getDueDate());
         }
+        if (request.getStartDate() != null) {
+            task.setStartDate(request.getStartDate());
+        }
         if (request.getPoints() > 0) {
             task.setPoints(request.getPoints());
         }
@@ -143,5 +148,24 @@ public class TaskService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid task status: " + status);
         }
+    }
+
+    public List<Task> getTasksForUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        try {
+            List<Task> tasks = taskRepository.findByUser(user);
+            if (tasks == null) {
+                return List.of();
+            }
+//            System.out.println(tasks);
+            return new ArrayList<>(tasks);
+        } catch (DataIntegrityViolationException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException("Error retrieving tasks for project: " + ex.getMessage(), ex);
+        }
+
     }
 }

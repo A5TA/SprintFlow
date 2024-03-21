@@ -31,12 +31,7 @@ public class TasksController {
     public ResponseEntity<TaskResponse> getTasksForProject(@PathVariable String projectName) {
         try {
             List<Task> res = taskService.getTaskForProject(projectName);
-            List<TaskDTO> taskDTOs = res.stream().map(this::convertToDTO).toList();
-            TaskResponse taskResponse = new TaskResponse();
-            taskResponse.setSuccess(true);
-            taskResponse.setCount(res.size());
-            taskResponse.setData(taskDTOs);
-            return ResponseEntity.ok(taskResponse);
+            return getTaskResponseResponseEntity(res);
         }catch (DataIntegrityViolationException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TaskResponse(false, 0, List.of()));
         } catch (AccessDeniedException ex) {
@@ -45,6 +40,31 @@ public class TasksController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new TaskResponse(false, 0, List.of()));
         }
     }
+
+    //Get the current users tasks across all their projects
+    @GetMapping("/getTasksForUser")
+    public ResponseEntity<TaskResponse> getTasksForUser() {
+        try {
+            List<Task> res = taskService.getTasksForUser();
+            return getTaskResponseResponseEntity(res);
+        }catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TaskResponse(false, 0, List.of()));
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TaskResponse(false, 0, List.of()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new TaskResponse(false, 0, List.of()));
+        }
+    }
+    //This makes it so i don't need to keep rewriting the dto code for both get tasks
+    private ResponseEntity<TaskResponse> getTaskResponseResponseEntity(List<Task> res) {
+        List<TaskDTO> taskDTOs = res.stream().map(this::convertToDTO).toList();
+        TaskResponse taskResponse = new TaskResponse();
+        taskResponse.setSuccess(true);
+        taskResponse.setCount(res.size());
+        taskResponse.setData(taskDTOs);
+        return ResponseEntity.ok(taskResponse);
+    }
+
 
     //creates a task for the project
     @PostMapping(value = "/createTaskForProject")
@@ -87,6 +107,7 @@ public class TasksController {
                 .id(task.getId())
                 .name(task.getName())
                 .description(task.getDescription())
+                .startDate(task.getStartDate())
                 .dueDate(task.getDueDate())
                 .points(task.getPoints())
                 .taskStatus(task.getTaskStatus())
