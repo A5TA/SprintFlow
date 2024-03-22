@@ -1,20 +1,22 @@
 package com.agile.project.services;
 
-import com.agile.project.auth.AuthenticationResponse;
 import com.agile.project.models.TeamComponents.Team;
 import com.agile.project.models.TeamComponents.TeamRepository;
 import com.agile.project.models.TeamComponents.TeamRequest;
 import com.agile.project.models.UserComponents.User;
 import com.agile.project.models.UserComponents.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +26,9 @@ public class TeamService {
     //we need to access the repository
     private final UserRepository repository;
     private final TeamRepository teamRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional // This prevents Lazy Loading errors
     public Optional<User> getCurrentUser() {
@@ -74,4 +79,21 @@ public class TeamService {
     }
 
 
+    public List<Team> getAllTeams() {
+        List<Team> teams = teamRepository.findAll();
+        return teams;
+
+    }
+    @Transactional
+    public List<Team> getAllTeamsForUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        User user = repository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        //u need to use the join table to query the teams for a particular user
+        return entityManager.createQuery(
+                        "SELECT t FROM Team t JOIN t.users u WHERE u.id = :userId", Team.class)
+                .setParameter("userId", user.getId())
+                .getResultList();
+
+    }
 }
