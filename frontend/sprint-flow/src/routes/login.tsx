@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Axios from "axios";
 
 export default function Login() {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const navigate = useNavigate();
 
 
     const handlePassword = (event: any) => {
@@ -28,7 +29,7 @@ export default function Login() {
       .then((response) => {
         console.log(response);
         if (response.status === 200){
-          console.log("your good to go!")
+          navigate("/main");
         }
       })
     }

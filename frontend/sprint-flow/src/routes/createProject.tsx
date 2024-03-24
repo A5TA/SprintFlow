@@ -1,14 +1,18 @@
+
 import Axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import DatePicker from "react-datepicker";
+import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function CProject() {
+
+const CreateProject = () => {
   const [teamName, setTeamName] = useState("");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [projectName, setProjectName] = useState("");
-
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   const teamNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTeamName(event.target.value);
@@ -18,11 +22,8 @@ export default function CProject() {
     setProjectName(event.target.value);
   }
   
-  
-
-  const sendReq = (event: React.FormEvent<HTMLFormElement>) => {
+  const createReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
-    const token = localStorage.getItem('token');
 
     const config = {
       headers: { 
@@ -49,6 +50,7 @@ export default function CProject() {
     .then((response) => {
       if(response.status === 200){
         console.log("You're good to go");
+        navigate("/main")
       }
     })
     .catch((error) => {
@@ -58,12 +60,12 @@ export default function CProject() {
 
   const handleSaveAndSend = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    sendReq(event);
+    createReq(event);
   }
 
   return (
     <div>
-      <form onSubmit={handleSaveAndSend}>
+        <form onSubmit={handleSaveAndSend}>
         <label>
           Enter the name of your team:
           <input type='text' onChange={teamNameChange} value={teamName}/>
@@ -89,5 +91,7 @@ export default function CProject() {
         </button>
       </form>
     </div>
-  );
+  )
 }
+
+export default CreateProject

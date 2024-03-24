@@ -1,8 +1,10 @@
 import Axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CTeam() {
   const [name, setName] = useState("");
+  const navigate = useNavigate();
   
   const onChange = (event: any) => {
     setName(event.target.value);
@@ -32,6 +34,7 @@ export default function CTeam() {
     .then((response) => {
       if(response.status === 200){
         console.log("your good to go");
+        navigate("/projects");
       }
     })
     .catch((error) => {

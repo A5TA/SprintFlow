@@ -1,11 +1,14 @@
 import { useState } from "react";
 import Axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
+
 
 export default function Register() {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [fName, setFName] = useState("");
     const [lName, setLName] = useState("");
+    const navigate = useNavigate();
 
     const handlePassword = (event: any) => {
         setPassword(event.target.value);
@@ -35,9 +38,12 @@ export default function Register() {
           bodyParameters
         )
         .then((response) => {
-          const token = response.data.token;
-          localStorage.setItem('token', token);
-          console.log(localStorage);
+          
+          if (response.status === 200){
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+            navigate("/main");
+          }
         })
         .catch((error) => {
           console.error("There was an error!", error);
@@ -68,9 +74,14 @@ export default function Register() {
           <input onChange={handlePassword} value={password} type='text'/>
         </label>
         <br/>
-        <button type='submit'>
+        <button type='submit' onClick={sendReq}>
           Sign Up
         </button>
+        <Link to="/login">
+        <button type='submit' >
+          Sign In
+        </button>
+        </Link>
         </form>  
     </div>
     );
