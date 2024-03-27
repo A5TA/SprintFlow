@@ -50,7 +50,7 @@ const CreateProject = () => {
     .then((response) => {
       if(response.status === 200){
         console.log("You're good to go");
-        navigate("/main")
+        navigate("/projects")
       }
     })
     .catch((error) => {

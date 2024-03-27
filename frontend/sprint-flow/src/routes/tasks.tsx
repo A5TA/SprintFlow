@@ -7,6 +7,7 @@ export default function CTasks() {
     const [description, setDescription] = useState("");
     const [projectName, setProjectName] = useState("");
     const [dueDate, setDueDate] = useState<Date | null>(null);
+    const [startDate, setStartDate] = useState<Date | null>(null);
     const [taskName, setTaskName] = useState("");
     const [points, setPoints] = useState("");
 
@@ -26,12 +27,14 @@ export default function CTasks() {
     const sendReq = (event: any) => {
         event.preventDefault();
         const token = localStorage.getItem('token'); 
+        const javaStartDate = dueDate ? new Date(dueDate.getTime()) : null;
         const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
         const pointsInt = parseInt(points, 10);
 
         const bodyParameters = {
             "name": taskName,
             "desc": description,
+            "startDate": javaStartDate,
             "dueDate": javaDueDate,
             "points": pointsInt,
             "projectName": projectName,
@@ -70,6 +73,11 @@ export default function CTasks() {
         <label>
          Description:
           <input onChange={handleDescription} value={description} type='text'/>
+        </label>
+        <br/>
+        <label>
+          Start Date:
+          <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
         </label>
         <br/>
         <label>
