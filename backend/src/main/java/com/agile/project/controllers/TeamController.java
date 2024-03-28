@@ -6,6 +6,8 @@ import com.agile.project.models.ProjectComponents.ProjectResponse;
 import com.agile.project.models.TeamComponents.Team;
 import com.agile.project.models.TeamComponents.TeamRequest;
 import com.agile.project.models.TeamComponents.TeamResponse;
+import com.agile.project.models.TeamComponents.UserTeamResponse;
+import com.agile.project.models.UserComponents.User;
 import com.agile.project.services.TeamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +66,7 @@ public class TeamController {
         List<Team> teamsResponse = teamService.getAllTeams();
         return getTeamsResponseResponseEntity(teamsResponse);
     }
-    //TODO:GetALLTeamsForUser
+
     @GetMapping(value="/getAllTeamsForUser")
     public ResponseEntity<TeamResponse> getAllTeamsForUser() {
         try {
@@ -75,4 +77,17 @@ public class TeamController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TeamResponse(false, 0, List.of()));
         }
     }
+
+    @GetMapping(value = "/getAllUsersForTeam/{teamName}")
+    public ResponseEntity<UserTeamResponse> getAllUsersForTeam(@PathVariable String teamName) {
+        try {
+            System.out.println("Start");
+            UserTeamResponse response = teamService.getAllUsersForTeam(teamName);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            //we want to throw a not found since something went wrong with finding the team
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserTeamResponse(false, 0, List.of()));
+        }
+    }
+
 }
