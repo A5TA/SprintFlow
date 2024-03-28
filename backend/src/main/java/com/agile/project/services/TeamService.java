@@ -1,8 +1,6 @@
 package com.agile.project.services;
 
-import com.agile.project.models.TeamComponents.Team;
-import com.agile.project.models.TeamComponents.TeamRepository;
-import com.agile.project.models.TeamComponents.TeamRequest;
+import com.agile.project.models.TeamComponents.*;
 import com.agile.project.models.UserComponents.User;
 import com.agile.project.models.UserComponents.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -19,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,5 +94,25 @@ public class TeamService {
                 .setParameter("userId", user.getId())
                 .getResultList();
 
+    }
+
+    public UserTeamResponse getAllUsersForTeam(String teamName) {
+        Set<User> users = teamRepository.findAllUsersByTeamName(teamName);
+        //convert the users to the DTO, so it doesn't have passwords and other private info
+                List<UserDTO> userDTOs = users.stream()
+                .map(user -> UserDTO.builder()
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .email(user.getEmail())
+                        .build())
+                .collect(Collectors.toList());
+
+        //System.out.println("The Users are: " + userDTOs.toString());
+        //build the response entity here so that it
+        return UserTeamResponse.builder()
+                .success(true)
+                .count(userDTOs.size())
+                .data(userDTOs)
+                .build();
     }
 }
