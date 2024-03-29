@@ -18,5 +18,5 @@ public class TaskDTO {
     private TaskStatus taskStatus;
     private Integer userId; // We cant have the object so we have id
     private Integer projectId;
-
+    private String assignedTO;
 }

@@ -30,10 +30,7 @@ public class TaskService {
         User currentUser = currentUserOptional.orElseThrow(() -> new IllegalStateException("Current user not found"));
 
         //confirm the project exists before making a tasks for it
-        Project project = projectRepository.findByName(taskRequest.getProjectName()); //we need to make sure the team exists
-        if (project == null) {
-            throw new DataIntegrityViolationException("Project with name '" + taskRequest.getProjectName() + "' not found");
-        }
+        Project project = projectRepository.findById(taskRequest.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found with id " + taskRequest.getProjectId()));; //we need to make sure the team exists
 
         //build the new task
         Task task = Task.builder()
@@ -58,18 +55,22 @@ public class TaskService {
 
     }
     @Transactional
-    public List<Task> getTaskForProject(String projectName) {
+    public List<TaskDTO> getTaskForProject(Integer projectId) {
         try {
-            Project project = projectRepository.findByName(projectName);
-            if (project == null) {
-                throw new DataIntegrityViolationException("Project with name '" + projectName + "' not found");
-            }
-            List<Task> tasks = taskRepository.findByProjectName(projectName);
+            //we need to look up the project by id so that it throws an error if this projectid doesn't exist
+            Project project = projectRepository.findById(projectId).orElseThrow(() -> new DataIntegrityViolationException("Project with ID '" + projectId + "' not found"));;
+
+            List<Task> tasks = taskRepository.findByProjectId(projectId);
             if (tasks == null) {
                 return List.of();
             }
-//            System.out.println(tasks);
-            return new ArrayList<>(tasks);
+            // Create a new list to store tasks with user's email added
+            List<TaskDTO> tasksWithUserEmail = new ArrayList<>();
+            for (Task task : tasks) {
+                TaskDTO taskDTO = convertToDTO(task, task.getUser().getEmail()); //Make the new DTO with the users email
+                tasksWithUserEmail.add(taskDTO);
+            }
+            return tasksWithUserEmail;
         } catch (DataIntegrityViolationException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -150,7 +151,7 @@ public class TaskService {
         }
     }
 
-    public List<Task> getTasksForUser() {
+    public List<TaskDTO> getTasksForUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
         User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -159,13 +160,35 @@ public class TaskService {
             if (tasks == null) {
                 return List.of();
             }
-//            System.out.println(tasks);
-            return new ArrayList<>(tasks);
+            // Create a new list to store tasks with user's email added
+            List<TaskDTO> tasksWithUserEmail = new ArrayList<>();
+            for (Task task : tasks) {
+                TaskDTO taskDTO = convertToDTO(task, user.getEmail()); //there is only 1 email for this since its the same user
+                tasksWithUserEmail.add(taskDTO);
+            }
+            return tasksWithUserEmail;
         } catch (DataIntegrityViolationException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new RuntimeException("Error retrieving tasks for project: " + ex.getMessage(), ex);
         }
 
+    }
+
+
+    //This method converts the Entity object for a Task to a DTO so that it can be viewed properly in the json res
+    private TaskDTO convertToDTO(Task task, String userEmail) {
+        return TaskDTO.builder()
+                .id(task.getId())
+                .name(task.getName())
+                .description(task.getDescription())
+                .startDate(task.getStartDate())
+                .dueDate(task.getDueDate())
+                .points(task.getPoints())
+                .taskStatus(task.getTaskStatus())
+                .userId(task.getUser().getId()) // Assuming getId() returns the user's ID
+                .projectId(task.getProject().getId()) // Assuming getId() returns the project's ID
+                .assignedTO(userEmail) //This is the email that the task is assigned to
+                .build();
     }
 }
