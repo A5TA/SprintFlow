@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import Axios from 'axios';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { SelectChangeEvent } from '@mui/material/Select';
+
+
+const theme = createTheme();
+
+export default function Projects() {
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [data, setData] = useState<string[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const token = localStorage.getItem('token');
 
 interface Project {
   id: string;
@@ -235,15 +250,10 @@ export default function Projects() {
         }
       });
       setProjects(response.data.data);
-      // Initialize expanded state for projects
-      const initialExpandedState: { [key: string]: boolean } = {};
-      response.data.data.forEach((project: Project) => {
-        initialExpandedState[project.id] = false;
-      });
-      setExpandedProjects(initialExpandedState);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
+  }
   };
 
   const getProjectIdByName = (projectName: string): string | undefined => {
@@ -275,17 +285,19 @@ export default function Projects() {
   };
   
 
-
-
   useEffect(() => {
     fetchTeams();
   }, []);
 
   useEffect(() => {
-    if (selectedTeam !== "") {
+    if (selectedTeam !== '') {
       fetchProjects();
     }
   }, [selectedTeam]);
+
+  const handleTeamChange = (event: SelectChangeEvent<string>) => {
+    setSelectedTeam(event.target.value);
+  }
 
   useEffect(() => {
     if (taskCreated) {
@@ -326,12 +338,39 @@ export default function Projects() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <div>
-        <div>
-          <h2>Current Teams:</h2>
-          <ul>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Teams
+          </Typography>
+          <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
+            Create Team
+          </Button>
+          <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
+            <MenuItem value="" disabled>Select Team</MenuItem>
             {data.map((team: string, index: number) => (
+              <MenuItem key={index} value={team}>{team}</MenuItem>
+            ))}
+          </Select>
+        </Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Projects
+          </Typography>
+          {projects.length > 0 ? (
+            projects.map((project: any, index: number) => (
+              <Typography key={index} variant="body1">{project.name}</Typography>
+            ))
+          ) : (
+            <Typography variant="body1">No projects available for the selected team</Typography>
+          )}
+          <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mt: 2 }}>
+            Create Project
+          </Button>
+        </Box>
+      </Container>
+    </ThemeProvider>
               <li key={index}>{team}</li>
             ))}
           </ul>
