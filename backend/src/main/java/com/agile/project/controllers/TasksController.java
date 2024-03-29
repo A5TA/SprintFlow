@@ -27,10 +27,10 @@ public class TasksController {
     }
 
     //get all the tasks for a project
-    @GetMapping("/getTaskForProject/{projectName}")
-    public ResponseEntity<TaskResponse> getTasksForProject(@PathVariable String projectName) {
+    @GetMapping("/getTaskForProject/{projectId}")
+    public ResponseEntity<TaskResponse> getTasksForProject(@PathVariable Integer projectId) {
         try {
-            List<Task> res = taskService.getTaskForProject(projectName);
+            List<TaskDTO> res = taskService.getTaskForProject(projectId);
             return getTaskResponseResponseEntity(res);
         }catch (DataIntegrityViolationException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TaskResponse(false, 0, List.of()));
@@ -45,7 +45,7 @@ public class TasksController {
     @GetMapping("/getTasksForUser")
     public ResponseEntity<TaskResponse> getTasksForUser() {
         try {
-            List<Task> res = taskService.getTasksForUser();
+            List<TaskDTO> res = taskService.getTasksForUser();
             return getTaskResponseResponseEntity(res);
         }catch (DataIntegrityViolationException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new TaskResponse(false, 0, List.of()));
@@ -56,12 +56,12 @@ public class TasksController {
         }
     }
     //This makes it so i don't need to keep rewriting the dto code for both get tasks
-    private ResponseEntity<TaskResponse> getTaskResponseResponseEntity(List<Task> res) {
-        List<TaskDTO> taskDTOs = res.stream().map(this::convertToDTO).toList();
+    private ResponseEntity<TaskResponse> getTaskResponseResponseEntity(List<TaskDTO> res) {
+//        List<TaskDTO> taskDTOs = res.stream().map(this::convertToDTO).toList();
         TaskResponse taskResponse = new TaskResponse();
         taskResponse.setSuccess(true);
         taskResponse.setCount(res.size());
-        taskResponse.setData(taskDTOs);
+        taskResponse.setData(res);
         return ResponseEntity.ok(taskResponse);
     }
 
@@ -99,20 +99,5 @@ public class TasksController {
             //The project for the task isn't found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-    }
-
-    //This method converts the Entity object for a Task to a DTO so that it can be viewed properly in the json res
-    private TaskDTO convertToDTO(Task task) {
-        return TaskDTO.builder()
-                .id(task.getId())
-                .name(task.getName())
-                .description(task.getDescription())
-                .startDate(task.getStartDate())
-                .dueDate(task.getDueDate())
-                .points(task.getPoints())
-                .taskStatus(task.getTaskStatus())
-                .userId(task.getUser().getId()) // Assuming getId() returns the user's ID
-                .projectId(task.getProject().getId()) // Assuming getId() returns the project's ID
-                .build();
     }
 }
