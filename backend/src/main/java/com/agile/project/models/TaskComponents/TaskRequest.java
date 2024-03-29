@@ -17,5 +17,5 @@ public class TaskRequest {
     Date startDate;
     Date dueDate;
     int points;
-    String projectName;
+    Integer projectId;
 }

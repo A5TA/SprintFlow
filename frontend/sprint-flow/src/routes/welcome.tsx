@@ -6,10 +6,17 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Link, useNavigate } from "react-router-dom";  
 
 const theme = createTheme();
 
-function Welcome() {
+export default function Welcome() {
+  const navigate = useNavigate();
+    const handleLogout = (event: any) => {
+        event.preventDefault();
+        localStorage.clear();
+        navigate("/");
+    }
     return (
         <ThemeProvider theme={theme}>
             <Container maxWidth="md">
@@ -30,9 +37,12 @@ function Welcome() {
                         </Grid>
                     </Grid>
                 </Box>
+              <div style={{position: 'absolute', top: 20, right: 20 }}>
+                  <button onClick={handleLogout}>
+                      Logout
+                  </button>
+              </div>
             </Container>
         </ThemeProvider>
     );
 }
-
-export default Welcome;

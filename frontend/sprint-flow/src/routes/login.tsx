@@ -23,6 +23,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
@@ -46,6 +47,33 @@ export default function SignIn() {
     } catch (error) {
       console.error('Login failed:', error);
       // Handle error
+      
+    const handlePassword = (event: any) => {
+        setPassword(event.target.value);
+    }
+    const handleEmail = (event: any) => {
+        setEmail(event.target.value);
+    }
+    const sendReq = (event: any) => {
+      event.preventDefault(); 
+
+      const bodyParameters = {
+          "email": email,
+          "password": password,
+        };
+      
+      Axios.post( 
+        'http://localhost:8080/api/v1/auth/login',
+        bodyParameters
+      )
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200){
+          const token = response.data.token;
+          localStorage.setItem('token', token);
+          navigate("/main");
+        }
+      })
     }
   };
 
