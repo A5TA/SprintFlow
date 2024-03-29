@@ -15,6 +15,7 @@ import CTasks from "./routes/tasks";
 import Welcome from "./routes/welcome";
 import CreateProject from "./routes/createProject";
 import CreateTask from "./routes/tasks";
+import Password from "./routes/forgotPassword";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
   {
     path: "/register", 
     element: <Register/>
+  },
+  {
+    path: "/forgotPassword", 
+    element: <Password/>
   },
   {
     path: "/projects", 

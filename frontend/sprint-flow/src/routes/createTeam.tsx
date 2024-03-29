@@ -1,23 +1,25 @@
+import React, { useState } from 'react';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Axios from 'axios';
-import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const theme = createTheme();
 
 export default function CTeam() {
   const [name, setName] = useState("");
   const navigate = useNavigate();
-  
-  const onChange = (event: any) => {
+
+  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   }
 
-  
-
-  const sendReq = (event: any) => {
-    event.preventDefault(); 
+  const sendReq = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const token = localStorage.getItem('token');
 
     const config = {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
       }
     };
@@ -25,34 +27,61 @@ export default function CTeam() {
     const bodyParameters = {
       "name": name
     };
-    
-    Axios.post( 
+
+    Axios.post(
       'http://localhost:8080/api/v1/team-controller/createTeamFromUser',
       bodyParameters,
       config
     )
-    .then((response) => {
-      if(response.status === 200){
-        console.log("your good to go");
-        navigate("/projects");
-      }
-    })
-    .catch((error) => {
-      console.error("There was an error!", error);
-    });
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("Your team has been created successfully");
+          navigate("/projects");
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+      });
   }
 
   return (
-    <div>
-      <form onSubmit={sendReq}>
-        <label>
-          Enter the name of your team:
-          <input type='text' onChange={onChange} value={name}/>
-        </label>
-        <button type='submit'>
-          Create Team
-        </button>
-      </form>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            Enter the name of your team
+          </Typography>
+          <Box component="form" onSubmit={sendReq} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              label="Team Name"
+              name="name"
+              autoComplete="off"
+              autoFocus
+              value={name}
+              onChange={onChange}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Create Team
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 }

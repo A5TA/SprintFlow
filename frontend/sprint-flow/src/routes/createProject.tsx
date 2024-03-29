@@ -1,97 +1,127 @@
-
+import React, { useState } from 'react';
+import { Box, Button, Container, TextField, Typography, TextFieldProps } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from '@mui/lab/DatePicker';
+import AdapterDayjs from '@mui/lab/AdapterDayjs';
 
+const theme = createTheme();
 
 const CreateProject = () => {
-  const [teamName, setTeamName] = useState("");
+  const [teamName, setTeamName] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [projectName, setProjectName] = useState("");
+  const [projectName, setProjectName] = useState('');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
   const teamNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTeamName(event.target.value);
-  }
+  };
 
   const projectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(event.target.value);
-  }
-  
+  };
+
   const createReq = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); 
+    event.preventDefault();
 
     const config = {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     };
 
-    // Convert startDate and endDate to Java Date objects
     const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
     const javaEndDate = endDate ? new Date(endDate.getTime()) : null;
 
     const bodyParameters = {
-      "name": projectName,
-      "startDate": javaStartDate, // Java Date object
-      "endDate": javaEndDate, // Java Date object
-      "teamName": teamName
+      name: projectName,
+      startDate: javaStartDate,
+      endDate: javaEndDate,
+      teamName: teamName,
     };
-    
-    Axios.post( 
+
+    Axios.post(
       'http://localhost:8080/api/v1/project-controller/createProject',
       bodyParameters,
       config
     )
-    .then((response) => {
-      if(response.status === 200){
-        console.log("You're good to go");
-        navigate("/projects")
-      }
-    })
-    .catch((error) => {
-      console.error("There was an error!", error);
-    });
-  }
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("You're good to go");
+          navigate('/projects');
+        }
+      })
+      .catch((error) => {
+        console.error('There was an error!', error);
+      });
+  };
 
   const handleSaveAndSend = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     createReq(event);
-  }
+  };
 
   return (
-    <div>
-        <form onSubmit={handleSaveAndSend}>
-        <label>
-          Enter the name of your team:
-          <input type='text' onChange={teamNameChange} value={teamName}/>
-        </label>
-        <br/>
-        <label>
-          Start Date:
-          <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
-        </label>
-        <br/>
-        <label>
-          End Date:
-          <DatePicker selected={endDate} onChange={(date: Date | null) => setEndDate(date)} />
-        </label>
-        <br/>
-        <label>
-          Project Name:
-          <input type='text' onChange={projectChange} value={[projectName]}/>
-        </label>
-        <br/>
-        <button type='submit'>
-          Create Project
-        </button>
-      </form>
-    </div>
-  )
-}
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            Enter Project Details
+          </Typography>
+          <Box component="form" onSubmit={handleSaveAndSend} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="teamName"
+              label="Team Name"
+              name="teamName"
+              autoComplete="off"
+              autoFocus
+              value={teamName}
+              onChange={teamNameChange}
+            />
+            <DatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(newDate: Date | null) => setStartDate(newDate)}
+              renderInput={(params: TextFieldProps) => <TextField {...params} />}
+            />
+            <DatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(newDate: Date | null) => setEndDate(newDate)}
+              renderInput={(params: TextFieldProps) => <TextField {...params} />}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="projectName"
+              label="Project Name"
+              name="projectName"
+              autoComplete="off"
+              value={projectName}
+              onChange={projectChange}
+            />
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+              Create Project
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
+  );
+};
 
-export default CreateProject
+export default CreateProject;
