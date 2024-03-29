@@ -14,7 +14,7 @@ import Projects from "./routes/projects";
 import CTasks from "./routes/tasks";
 import Welcome from "./routes/welcome";
 import CreateProject from "./routes/createProject";
-import CreateTask from "./routes/tasks";
+import JoinTeam from "./routes/joinTeam";
 
 const router = createBrowserRouter([
   {
@@ -58,9 +58,9 @@ const router = createBrowserRouter([
     element: <CreateProject/>
   },
   {
-    path: "/projects/createTask", 
-    element: <CreateTask/>
-  }
+    path: "/projects/joinTeam", 
+    element: <JoinTeam/>
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
