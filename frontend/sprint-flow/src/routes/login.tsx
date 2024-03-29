@@ -29,6 +29,8 @@ export default function Login() {
       .then((response) => {
         console.log(response);
         if (response.status === 200){
+          const token = response.data.token;
+          localStorage.setItem('token', token);
           navigate("/main");
         }
       })
