@@ -47,6 +47,7 @@ export default function SignIn() {
     } catch (error) {
       console.error('Login failed:', error);
       // Handle error
+    }
       
     const handlePassword = (event: any) => {
         setPassword(event.target.value);
