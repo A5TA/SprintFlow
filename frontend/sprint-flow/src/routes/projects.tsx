@@ -36,7 +36,7 @@ export default function Projects() {
   // State for authentication token and fetched data
   const token: string | null = localStorage.getItem('token');
   const [data, setData] = useState<string[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  //const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const email = localStorage.getItem('email');
   
@@ -106,30 +106,14 @@ export default function Projects() {
   }
 
   // Event handlers for form inputs
-  const handleTeamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTeam(event.target.value);
-  };
 
-  const handleTeamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTeamChange = (event: any) => {
     setSelectedTeam(event.target.value);
   };
 
   const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTaskProject(event.target.value);
     fetchTasks(event.target.value);
-  };
-
-  const toggleProject = async (project: Project) => {
-    const projectId = project.id;
-    setExpandedProjects(prevState => ({
-      ...prevState,
-      [projectId]: !prevState[projectId]
-    }));
-
-    if (!expandedProjects[projectId]) {
-      setSelectedProject(project);
-      fetchTasks(project.name);
-    }
   };
 
   // Function to handle task editing
@@ -144,10 +128,6 @@ export default function Projects() {
     setEditedTaskPoints(points);
     setTaskStatus(task.taskStatus);
   };
-
-  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTaskProject(event.target.value);
-    fetchTasks(event.target.value);
 
   // Function to save edited task
   const saveEditedTask = (task: Task) => {
@@ -207,9 +187,6 @@ export default function Projects() {
   };
 
   // Function to cancel editing
-  const cancelEditing = () => {
-    setEditingTaskId(null);
-  };
 
   const handleDescription = (event: any) => {
     setDescription(event.target.value);
@@ -258,7 +235,7 @@ export default function Projects() {
     }
   };
 
-  const assignTask = async (event: any) => {
+  const assignTaskReq = async (event: any) => {
     const bodyParameters = {
       "assignEmail": assignEmail,
       "taskId": editingTaskId,
@@ -300,42 +277,6 @@ export default function Projects() {
   };
 
   // Function to send task creation request
-  const sendReq = (event: any) => {
-    event.preventDefault();
-    const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
-    const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
-    const pointsInt = parseInt(points, 10);
-
-    const bodyParameters = {
-        "name": taskName,
-        "desc": description,
-        "startDate": javaStartDate,
-        "dueDate": javaDueDate,
-        "points": pointsInt,
-        "projectName": selectedTaskProject,
-      };
-
-      const config = {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-        }
-      };
-    
-    Axios.post( 
-      'http://localhost:8080/api/v1/tasks-controller/createTaskForProject',
-      bodyParameters,
-      config
-    )
-    .then((response) => {
-        if (response.status === 200){
-            console.log("Your good to go!")
-            setTaskCreated(true);
-        }
-    })
-    .catch((error) => {
-      console.error("There was an error!", error);
-    });
-  };
 
   useEffect(() => {
     // Fetch data for initial rendering
@@ -363,18 +304,6 @@ export default function Projects() {
   }, [taskCreated, selectedTaskProject]);
   
    // Function to fetch teams
-  const fetchTeams = async () => {
-    try {
-      const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setData(response.data.data);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-    }
-  };
 
   const fetchProjects = async () => {
     try {
@@ -385,6 +314,7 @@ export default function Projects() {
         });
         const projects = response.data.data;
         console.log(projects);
+        //(projects);
         projects.forEach((project: Project) => {
             addToMap(project.name, project.id);
         });
@@ -425,45 +355,7 @@ export default function Projects() {
   };
 
   // Function to save edited task details
-  const saveEditedTask = (task: Task) => {
-    const token = localStorage.getItem('token');
-    const javaStartDate = editedTaskStart ? new Date(editedTaskStart).getTime() : null;
-    const javaDueDate = editedTaskEnd ? new Date(editedTaskEnd).getTime() : null;
-    const points = editedTaskPoints !== null ? parseInt(editedTaskPoints.toString(), 10) : 0;
-
-    const bodyParameters = {
-      "name": editedTaskName,
-      "desc": editedTaskDesc,
-      "startDate": javaStartDate,
-      "dueDate": javaDueDate,
-      "points": points,
-      "taskStatus": taskStatus,
-      "taskId": task.id,
-    };
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
-    };
-
-    Axios.post(
-      'http://localhost:8080/api/v1/tasks-controller/modifyTaskDetails',
-      bodyParameters,
-      config
-    )
-    .then((response) => {
-      if (response.status === 200){
-        console.log("Task details updated successfully!");
-        setTaskCreated(true);
-      }
-    })
-    .catch((error) => {
-      console.error("There was an error!", error);
-    });
-
-    setEditingTaskId(null);
-  };
+  
 
   // Function to cancel task editing
   const cancelEditing = () => {
@@ -533,6 +425,9 @@ export default function Projects() {
           <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
             Create Team
           </Button>
+          <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
+            Join Team
+          </Button>
           <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
             <MenuItem value="" disabled>Select Team</MenuItem>
             {data.map((team: string, index: number) => (
@@ -544,81 +439,88 @@ export default function Projects() {
           <Typography variant="h5" gutterBottom>
             Current Projects
           </Typography>
-          {projects.length > 0 ? (
+          {mapProjects.size > 0 ? (
             <div>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {projects.map((project: Project) => (
-                <li key={project.id} style={{ marginBottom: '5px' }}>
-                  <button onClick={() => toggleProject(project)}>{expandedProjects[project.id] ? '-' : '>'}</button>
-                  <span>{project.name}</span>
-                  {expandedProjects[project.id] && (
-                    <ul>
-                      {/* Render tasks for the selected project */}
-                      {tasks.map((task: Task) => (
-                        <li key={task.id}>
-                          {task.name} 
-                          <span onClick={() => handleEditTask(task)}>🖉</span>
-                          {/* Additional content for editing task */}
-                          {task.id === editingTaskId && (
-                            <div>
-                              <label>
-                                Name:     
-                                <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
-                              </label>
-                              <br/>
-                              <label>
-                                Description:     
-                                <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
-                              </label>
-                              <br/>
-                              <label>
-                                Start Date:     
-                                <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
-                              </label>
-                              <br/>
-                              <label>
-                                End Date:     
-                                <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
-                              </label>
-                              <br/>
-                              <label>
-                                Points:
-                                <input value={editedTaskPoints?.toString()} onChange={(e) =>{ 
-                                  const inputValue = e.target.value;
-                                  const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
-                                  setEditedTaskPoints(parsedValue);}} 
-                                />
-                              </label>
-                              <br/>
-                              <label>
-                                Status:
-                                <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
-                              </label>
-                              <br/>
-                              <label>
-                                Assign Task:
-                                <input type="text" value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)} />
-                              </label>
-                              <button onClick={() => {
-                              assignTaskReq(task);
-                              cancelEditing();
-                              toggleProject(project);
-                              }}>Assign</button>
-                              <br/>
-                              <button onClick={() => {
-                              saveEditedTask(task);
-                              cancelEditing();
-                              toggleProject(project);}}>Save</button>
-                              <button onClick={() => cancelEditing()}>Cancel</button>
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
+  {Array.from(mapProjects).map(([projectName, projectId], index) => (
+    <li key={index} style={{ marginBottom: '5px' }}>
+      <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
+        {expandedProjects[projectId] ? '-' : '>'}
+      </button>
+      <span>{projectName}</span>
+      {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
+        <ul>
+          {/* Render tasks for the selected project */}
+          {projectTasks[projectName].map((task: Task) => (
+            <li key={task.id}>
+              {task.name}
+              <span onClick={() => handleEditTask(task)}>🖉</span>
+              {/* Additional content for editing task */}
+              {task.id === editingTaskId && (
+                <div>
+                  <label>
+                    Name:
+                    <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
+                  </label>
+                  <br />
+                  <label>
+                    Description:
+                    <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
+                  </label>
+                  <br />
+                  <label>
+                    Start Date:
+                    <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
+                  </label>
+                  <br />
+                  <label>
+                    End Date:
+                    <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
+                  </label>
+                  <br />
+                  <label>
+                    Points:
+                    <input
+                      value={editedTaskPoints?.toString()}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
+                        setEditedTaskPoints(parsedValue);
+                      }}
+                    />
+                  </label>
+                  <br />
+                  <label>
+                    Status:
+                    <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
+                  </label>
+                  <br />
+                  <label>
+                    Assign Task:
+                    <input type="text" value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)} />
+                  </label>
+                  <button onClick={() => {
+                    assignTaskReq(task);
+                    cancelEditing();
+                    toggleProject({ id: projectId, name: projectName });
+                  }}>Assign</button>
+                  <br />
+                  <button onClick={() => {
+                    saveEditedTask(task);
+                    cancelEditing();
+                    toggleProject({ id: projectId, name: projectName });
+                  }}>Save</button>
+                  <button onClick={() => cancelEditing()}>Cancel</button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  ))}
+</ul>
+
           </div>
           ) : (
             <Typography variant="body1">No projects available for the selected team</Typography>
@@ -634,8 +536,8 @@ export default function Projects() {
         <label>Select Project:</label>
         <select onChange={handleProjectChange}>
           <option value="">Select Project</option>
-          {projects.map((project: Project, index: number) => (
-            <option key={index} value={project.name}>{project.name}</option>
+          {Array.from(mapProjects).map(([projectName, projectId], index) => (
+            <option key={index} value={projectName}>{projectName}</option>
           ))}
         </select>
         <form id="form" onSubmit={sendReq}>
