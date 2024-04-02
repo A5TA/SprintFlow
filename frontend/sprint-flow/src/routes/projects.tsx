@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Axios from 'axios';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Container from '@mui/material/Container';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Axios from 'axios';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme();
 
 interface Project {
   id: string;
@@ -36,7 +45,7 @@ export default function Projects() {
   const [expandedProjects, setExpandedProjects] = useState<{ [key: string]: boolean }>({});
   const [projectTasks, setProjectTasks] = useState<{ [key: string]: Task[] }>({});
 
-  // State for task editing and creation
+   // Task creation state
   const [description, setDescription] = useState("");
   const [projectName, setProjectName] = useState("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
@@ -44,6 +53,8 @@ export default function Projects() {
   const [taskName, setTaskName] = useState("");
   const [points, setPoints] = useState("");
   const [taskCreated, setTaskCreated] = useState<boolean>(false);
+
+  // Task editing state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTaskName, setEditedTaskName] = useState<string>("");
   const [editedTaskDesc, setEditedTaskDesc] = useState<string>("");
@@ -99,6 +110,29 @@ export default function Projects() {
     setSelectedTeam(event.target.value);
   };
 
+  const handleTeamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTeam(event.target.value);
+  };
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTaskProject(event.target.value);
+    fetchTasks(event.target.value);
+  };
+
+  const toggleProject = async (project: Project) => {
+    const projectId = project.id;
+    setExpandedProjects(prevState => ({
+      ...prevState,
+      [projectId]: !prevState[projectId]
+    }));
+
+    if (!expandedProjects[projectId]) {
+      setSelectedProject(project);
+      fetchTasks(project.name);
+    }
+  };
+
+  // Function to handle task editing
   const handleEditTask = (task: Task) => {
     setEditingTaskId(task.id);
     setEditedTaskName(task.name);
@@ -109,12 +143,72 @@ export default function Projects() {
     const points = task.points !== null ? parseInt(task.points, 10) : 0;
     setEditedTaskPoints(points);
     setTaskStatus(task.taskStatus);
-    // You can set other edited task properties here if needed
   };
 
   const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTaskProject(event.target.value);
     fetchTasks(event.target.value);
+
+  // Function to save edited task
+  const saveEditedTask = (task: Task) => {
+    const javaStartDate = editedTaskStart ? new Date(editedTaskStart).getTime() : null;
+    const javaDueDate = editedTaskEnd ? new Date(editedTaskEnd).getTime() : null;
+    const points = parseInt(editedTaskPoints!.toString(), 10);
+
+    const bodyParameters = {
+      "name": editedTaskName,
+      "desc": editedTaskDesc,
+      "startDate": javaStartDate,
+      "dueDate": javaDueDate,
+      "points": points,
+      "taskStatus": taskStatus,
+      "taskId": task.id,
+    };
+
+    const config = {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+      }
+    };
+  
+    Axios.post( 
+      'http://localhost:8080/api/v1/tasks-controller/modifyTaskDetails',
+      bodyParameters,
+      config
+    )
+    .then((response) => {
+      if (response.status === 200){
+          console.log("Your good to go!")
+          const updatedTasks: Task[] = tasks.map(t => {
+            if (t.id === task.id) {
+                return {
+                    ...t,
+                    name: editedTaskName,
+                    description: editedTaskDesc,
+                    startDate: editedTaskStart || new Date(),
+                    dueDate: editedTaskEnd || new Date(),
+                    points: editedTaskPoints!.toString(),
+                    taskStatus: taskStatus
+                };
+            } else {
+                return t;
+            }
+          });
+          setTasks(updatedTasks);
+          setTaskCreated(true);
+          cancelEditing();
+      }
+    })
+    .catch((error) => {
+      console.error("There was an error!", error);
+    });
+
+    setEditingTaskId(null);
+  };
+
+  // Function to cancel editing
+  const cancelEditing = () => {
+    setEditingTaskId(null);
   };
 
   const handleDescription = (event: any) => {
@@ -205,6 +299,82 @@ export default function Projects() {
     });
   };
 
+  // Function to send task creation request
+  const sendReq = (event: any) => {
+    event.preventDefault();
+    const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
+    const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+    const pointsInt = parseInt(points, 10);
+
+    const bodyParameters = {
+        "name": taskName,
+        "desc": description,
+        "startDate": javaStartDate,
+        "dueDate": javaDueDate,
+        "points": pointsInt,
+        "projectName": selectedTaskProject,
+      };
+
+      const config = {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+        }
+      };
+    
+    Axios.post( 
+      'http://localhost:8080/api/v1/tasks-controller/createTaskForProject',
+      bodyParameters,
+      config
+    )
+    .then((response) => {
+        if (response.status === 200){
+            console.log("Your good to go!")
+            setTaskCreated(true);
+        }
+    })
+    .catch((error) => {
+      console.error("There was an error!", error);
+    });
+  };
+
+  useEffect(() => {
+    // Fetch data for initial rendering
+    fetchTeams();
+  }, []);
+
+  useEffect(() => {
+    if (selectedTeam !== "") {
+      fetchProjects();
+    }
+  }, [selectedTeam]);
+
+  useEffect(() => {
+    if (taskCreated) {
+      fetchTasks(selectedTaskProject);
+      setTaskCreated(false); 
+
+      setTaskName("");
+      setDescription("");
+      setStartDate(null);
+      setDueDate(null);
+      setPoints("");
+      setSelectedTaskProject("");
+    }
+  }, [taskCreated, selectedTaskProject]);
+  
+   // Function to fetch teams
+  const fetchTeams = async () => {
+    try {
+      const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -341,48 +511,54 @@ export default function Projects() {
     });
   };
 
+// <select onChange={handleProjectChange}>
+//           <option value="">Select Project</option>
+//           {Array.from(mapProjects).map(([projectName, projectId], index) => (
+//             <option key={index} value={projectName}>{projectName}</option>
+//           ))}
+//         </select>
+
+
   // JSX rendering
   return (
-    <div>
-      {/* Team selection */}
-      <div>
-        <h2>Current Teams:</h2>
-        <ul>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Teams
+          </Typography>
           {data.map((team: string, index: number) => (
-            <li key={index}>{team}</li>
-          ))}
-        </ul>
-        <Link to="/projects/createTeam">Create Team</Link>
-        <br/>
-        <Link to="/projects/joinTeam">Join Team</Link>
-        <div>
-          <label>Select Team:</label>
-          <select onChange={handleTeamChange}>
-            <option value="">Select Team</option>
-            {data.map((team: string, index: number) => (
-              <option key={index} value={team}>{team}</option>
+              <li key={index} value={team}>{team}</li>
             ))}
-          </select>
-        </div>
-      </div>
-    
-      {/* Current Projects */}
-      <div>
-        <h2>Current Projects</h2>
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {Array.from(mapProjects).map(([projectName, projectId], index) => {
-            return (
-                <li key={index} style={{ marginBottom: '5px' }}> 
-                  <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
-                    {expandedProjects[projectId] ? '-' : '>'}
-                  </button>
-                  {projectName} - {projectId}
-                  {expandedProjects[projectId] && (
+          <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
+            Create Team
+          </Button>
+          <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
+            <MenuItem value="" disabled>Select Team</MenuItem>
+            {data.map((team: string, index: number) => (
+              <MenuItem key={index} value={team}>{team}</MenuItem>
+            ))}
+          </Select>
+        </Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Projects
+          </Typography>
+          {projects.length > 0 ? (
+            <div>
+            <ul style={{ listStyleType: 'none', padding: 0 }}>
+              {projects.map((project: Project) => (
+                <li key={project.id} style={{ marginBottom: '5px' }}>
+                  <button onClick={() => toggleProject(project)}>{expandedProjects[project.id] ? '-' : '>'}</button>
+                  <span>{project.name}</span>
+                  {expandedProjects[project.id] && (
                     <ul>
-                      {projectTasks[projectName] && projectTasks[projectName].map((task: Task) => (
+                      {/* Render tasks for the selected project */}
+                      {tasks.map((task: Task) => (
                         <li key={task.id}>
                           {task.name} 
                           <span onClick={() => handleEditTask(task)}>🖉</span>
+                          {/* Additional content for editing task */}
                           {task.id === editingTaskId && (
                             <div>
                               <label>
@@ -407,13 +583,10 @@ export default function Projects() {
                               <br/>
                               <label>
                                 Points:
-                                <input 
-                                  value={editedTaskPoints !== null ? editedTaskPoints.toString() : ''} 
-                                  onChange={(e) => {
-                                    const inputValue = e.target.value;
-                                    const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
-                                    setEditedTaskPoints(parsedValue);
-                                  }} 
+                                <input value={editedTaskPoints?.toString()} onChange={(e) =>{ 
+                                  const inputValue = e.target.value;
+                                  const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
+                                  setEditedTaskPoints(parsedValue);}} 
                                 />
                               </label>
                               <br/>
@@ -423,12 +596,19 @@ export default function Projects() {
                               </label>
                               <br/>
                               <label>
-                                Email:
-                                <input value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)}/>
-                                <button onClick={assignTask}>Assign</button>
+                                Assign Task:
+                                <input type="text" value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)} />
                               </label>
+                              <button onClick={() => {
+                              assignTaskReq(task);
+                              cancelEditing();
+                              toggleProject(project);
+                              }}>Assign</button>
                               <br/>
-                              <button onClick={() => saveEditedTask(task)}>Save</button>
+                              <button onClick={() => {
+                              saveEditedTask(task);
+                              cancelEditing();
+                              toggleProject(project);}}>Save</button>
                               <button onClick={() => cancelEditing()}>Cancel</button>
                             </div>
                           )}
@@ -437,20 +617,25 @@ export default function Projects() {
                     </ul>
                   )}
                 </li>
-            );
-          })}
-        </ul>
-        <Link to="/projects/createProject">Create Project</Link>
-      </div>
-      
-      {/* Task creation form */}
+              ))}
+            </ul>
+          </div>
+          ) : (
+            <Typography variant="body1">No projects available for the selected team</Typography>
+          )}
+          <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mt: 2 }}>
+            Create Project
+          </Button>
+        </Box>
+      </Container>
+
       <div style={{position: 'absolute', top: 200, right: 50 }}>
         <h2> Create Task In Project</h2>
         <label>Select Project:</label>
         <select onChange={handleProjectChange}>
           <option value="">Select Project</option>
-          {Array.from(mapProjects).map(([projectName, projectId], index) => (
-            <option key={index} value={projectName}>{projectName}</option>
+          {projects.map((project: Project, index: number) => (
+            <option key={index} value={project.name}>{project.name}</option>
           ))}
         </select>
         <form id="form" onSubmit={sendReq}>
@@ -484,9 +669,6 @@ export default function Projects() {
           </button>
         </form>  
       </div>
-    </div>
+    </ThemeProvider>
   );
-  
-  
-  
 }
