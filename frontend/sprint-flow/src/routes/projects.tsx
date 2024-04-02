@@ -29,14 +29,22 @@ interface Task {
 }
 
 export default function Projects() {
-  const token = localStorage.getItem('token');
+  // State for team and project selection
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [selectedTaskProject, setSelectedTaskProject] = useState<string>("");
+  
+  // State for authentication token and fetched data
+  const token: string | null = localStorage.getItem('token');
   const [data, setData] = useState<string[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const email = localStorage.getItem('email');
+  
+  // State for managing project expansion and tasks
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<{ [key: string]: boolean }>({});
+  const [projectTasks, setProjectTasks] = useState<{ [key: string]: Task[] }>({});
+
    // Task creation state
   const [description, setDescription] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -45,6 +53,7 @@ export default function Projects() {
   const [taskName, setTaskName] = useState("");
   const [points, setPoints] = useState("");
   const [taskCreated, setTaskCreated] = useState<boolean>(false);
+
   // Task editing state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTaskName, setEditedTaskName] = useState<string>("");
@@ -54,7 +63,52 @@ export default function Projects() {
   const [editedTaskPoints, setEditedTaskPoints] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
-  const [assignedTasks, setAssignedTasks] = useState<string[]>([]);
+
+  const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+
+  // Fetch teams and projects on component mount
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  useEffect(() => {
+    if (selectedTeam !== "") {
+      fetchProjects();
+    }
+  }, [selectedTeam]);
+
+  useEffect(() => {
+    if (taskCreated) {
+      fetchTasks(selectedTaskProject);
+      setTaskCreated(false);
+      setTaskName("");
+      setDescription("");
+      setStartDate(null);
+      setDueDate(null);
+      setPoints("");
+      setSelectedTaskProject("");
+    }
+  }, [taskCreated, selectedTaskProject]);
+
+  // Function to add project to map
+  function addToMap(projectName: string, projectID: string): void {
+      mapProjects.set(projectName, projectID);
+  }
+
+  // Function to get the project ID by project name
+  function getFromMap(projectName: string) {
+    return mapProjects.get(projectName);
+  } 
+
+  // Function to get project names from map
+  function getProjectNames(): string[] {
+    return Object.keys(mapProjects);
+  }
+
+  // Event handlers for form inputs
+  const handleTeamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTeam(event.target.value);
+  };
 
   const handleTeamChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTeam(event.target.value);
@@ -83,12 +137,17 @@ export default function Projects() {
     setEditingTaskId(task.id);
     setEditedTaskName(task.name);
     setEditedTaskDesc(task.description);
+    // Ensure that task.startDate is a Date object before assigning it to editedTaskStart
     setEditedTaskStart(task.startDate);
     setEditedTaskEnd(task.dueDate);
     const points = task.points !== null ? parseInt(task.points, 10) : 0;
     setEditedTaskPoints(points);
     setTaskStatus(task.taskStatus);
   };
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTaskProject(event.target.value);
+    fetchTasks(event.target.value);
 
   // Function to save edited task
   const saveEditedTask = (task: Task) => {
@@ -152,48 +211,91 @@ export default function Projects() {
     setEditingTaskId(null);
   };
 
-  // Function to handle task description change
   const handleDescription = (event: any) => {
     setDescription(event.target.value);
   };
 
-  // Function to handle task name change
+  const handleProjectName = (event: any) => {
+    setProjectName(event.target.value);
+  };
+
   const handleTaskName = (event: any) => {
     setTaskName(event.target.value);
   };
 
-  // Function to handle points change
   const handlePoints = (event: any) => {
     setPoints(event.target.value);
   };
 
-  // Function to assign task to a user
-  const assignTaskReq = (task: Task) => {
+  // Function to toggle project expansion and fetch tasks if necessary
+  const toggleProject = async (project: Project) => {
+    const projectId = project.id;
+    setExpandedProjects(prevState => ({
+      ...prevState,
+      [projectId]: !prevState[projectId]
+    }));
+
+    if (!expandedProjects[projectId]) {
+      setSelectedProject(project);
+
+      if (!projectTasks[projectId]) {
+        await fetchTasks(project.name);
+      }
+    }
+  };
+
+  // Fetch team data from API
+  const fetchTeams = async () => {
+    try {
+      const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  const assignTask = async (event: any) => {
     const bodyParameters = {
       "assignEmail": assignEmail,
-      "taskId": task.id
+      "taskId": editingTaskId,
     };
 
     const config = {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
       }
     };
 
-    Axios.post( 
+    Axios.post(
       'http://localhost:8080/api/v1/tasks-controller/assignTaskForUser',
       bodyParameters,
       config
     )
     .then((response) => {
-        if (response.status === 200){
-            console.log("Your good to go!")
-            setAssignedTasks([...assignedTasks, task.id]);
-            fetchTasks(selectedTaskProject);
-        }
+      if (response.status === 200){
+        console.log("Task assigned successfully!");
+        setTaskCreated(true);      }
     })
     .catch((error) => {
       console.error("There was an error!", error);
+      console.log(selectedTaskProject);
+    });
+    setEditingTaskId(null);
+    resetExpandedProjects();
+  };
+
+  // Function to reset the state of expanded projects
+  const resetExpandedProjects = () => {
+    setExpandedProjects(prevState => {
+      const resetState: { [key: string]: boolean } = {};
+      Object.keys(prevState).forEach(projectId => {
+        resetState[projectId] = false;
+      });
+      return resetState;
     });
   };
 
@@ -274,54 +376,150 @@ export default function Projects() {
     }
   };
 
-  // Function to fetch projects
   const fetchProjects = async () => {
     try {
-      const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setProjects(response.data.data);
-      // Initialize expanded state for projects
-      const initialExpandedState: { [key: string]: boolean } = {};
-      response.data.data.forEach((project: Project) => {
-        initialExpandedState[project.id] = false;
-      });
-      setExpandedProjects(initialExpandedState);
+        const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const projects = response.data.data;
+        console.log(projects);
+        projects.forEach((project: Project) => {
+            addToMap(project.name, project.id);
+        });
+        // Update projectNamesArr after setting projects
+        const initialExpandedState: { [key: string]: boolean } = {};
+        projects.forEach((project: Project) => {
+            initialExpandedState[project.id] = false;
+        });
+        setExpandedProjects(initialExpandedState);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+        console.error('Error fetching projects:', error);
     }
-  };
+};
 
-  const getProjectIdByName = (projectName: string): string | undefined => {
-    const project = projects.find(project => project.name === projectName);
-    return project ? project.id : undefined;
-  };
 
-  // Function to fetch tasks for a project
+  // Fetch tasks for the selected project from API
   const fetchTasks = async (projName: string) => {
+    const projId = mapProjects.get(projName)?.toString();
+    console.log(projId);
     try {
-      const projectId = getProjectIdByName(projName);
-      if (!projectId) {
-        console.error(`Project with name '${projName}' not found.`);
-        return;
-      }
-  
-      const response = await Axios.get(`http://localhost:8080/api/v1/tasks-controller/getTasksForUser`, {
+      const response = await Axios.get(`http://localhost:8080/api/v1/tasks-controller/getTaskForProject/${projId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-  
-      // Assuming response.data.data is an array of tasks
-      const tasksForProject = response.data.data.filter(task => task.projectId === projectId);
-      setTasks(tasksForProject);
-    } catch (error) {
+      const tasks = response.data.data;
+
+      const userTasks = tasks.filter((task: any) => task.assignedTO === email);
+      
+        setProjectTasks(prevState => ({
+          ...prevState,
+          [projName]: userTasks,
+        }));
+
+      } catch (error) {
       console.error('Error fetching tasks:', error);
     }
   };
 
+  // Function to save edited task details
+  const saveEditedTask = (task: Task) => {
+    const token = localStorage.getItem('token');
+    const javaStartDate = editedTaskStart ? new Date(editedTaskStart).getTime() : null;
+    const javaDueDate = editedTaskEnd ? new Date(editedTaskEnd).getTime() : null;
+    const points = editedTaskPoints !== null ? parseInt(editedTaskPoints.toString(), 10) : 0;
+
+    const bodyParameters = {
+      "name": editedTaskName,
+      "desc": editedTaskDesc,
+      "startDate": javaStartDate,
+      "dueDate": javaDueDate,
+      "points": points,
+      "taskStatus": taskStatus,
+      "taskId": task.id,
+    };
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    };
+
+    Axios.post(
+      'http://localhost:8080/api/v1/tasks-controller/modifyTaskDetails',
+      bodyParameters,
+      config
+    )
+    .then((response) => {
+      if (response.status === 200){
+        console.log("Task details updated successfully!");
+        setTaskCreated(true);
+      }
+    })
+    .catch((error) => {
+      console.error("There was an error!", error);
+    });
+
+    setEditingTaskId(null);
+  };
+
+  // Function to cancel task editing
+  const cancelEditing = () => {
+    setEditingTaskId(null);
+  };
+
+  // Function to submit task creation form
+  const sendReq = (event: any) => {
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
+    const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+    const pointsInt = parseInt(points, 10);
+
+    const bodyParameters = {
+      "name": taskName,
+      "desc": description,
+      "startDate": javaStartDate,
+      "dueDate": javaDueDate,
+      "points": pointsInt,
+      "projectId": mapProjects.get(selectedTaskProject),
+    };
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    };
+
+    Axios.post(
+      'http://localhost:8080/api/v1/tasks-controller/createTaskForProject',
+      bodyParameters,
+      config
+    )
+    .then((response) => {
+      if (response.status === 200){
+        console.log("Task created successfully!");
+        setTaskCreated(true);
+        resetExpandedProjects();
+      }
+    })
+    .catch((error) => {
+      console.error("There was an error!", error);
+      console.log(selectedTaskProject);
+    });
+  };
+
+// <select onChange={handleProjectChange}>
+//           <option value="">Select Project</option>
+//           {Array.from(mapProjects).map(([projectName, projectId], index) => (
+//             <option key={index} value={projectName}>{projectName}</option>
+//           ))}
+//         </select>
+
+
+  // JSX rendering
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">

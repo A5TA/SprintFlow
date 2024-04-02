@@ -33,6 +33,32 @@ export default function SignUp() {
     setLastName(event.target.value);
   };
 
+        const bodyParameters = {
+            "firstName": fName,
+            "lastName": lName,
+            "email": email,
+            "password": password,
+          };
+        
+        Axios.post( 
+          'http://localhost:8080/api/v1/auth/register',
+          bodyParameters
+        )
+        .then((response) => {
+          
+          if (response.status === 200){
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+            localStorage.setItem('email', email);
+            navigate("/main");
+          }
+        })
+        .catch((error) => {
+          console.error("There was an error!", error);
+        });
+      }
+    
+
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };

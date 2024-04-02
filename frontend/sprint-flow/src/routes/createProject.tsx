@@ -5,6 +5,8 @@ import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from '@mui/lab/DatePicker';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
+import Select from 'react-select';
+import 'react-select-search/style.css'
 
 const theme = createTheme();
 
@@ -16,12 +18,34 @@ const CreateProject = () => {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
-  const teamNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [data, setData] = useState<string[]>([]);
+
+  const teamNameChange = (event: any) => {
     setTeamName(event.target.value);
   };
 
   const projectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(event.target.value);
+  }
+
+  // Fetch team data from API
+  const fetchTeams = async () => {
+    try {
+      const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+  
   };
 
   const createReq = (event: React.FormEvent<HTMLFormElement>) => {
@@ -64,6 +88,12 @@ const CreateProject = () => {
     createReq(event);
   };
 
+  const options = data.map((element) => ({
+    label: element,
+    value: element,
+  }));
+  
+  //<Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="xs">
@@ -123,5 +153,6 @@ const CreateProject = () => {
     </ThemeProvider>
   );
 };
+
 
 export default CreateProject;
