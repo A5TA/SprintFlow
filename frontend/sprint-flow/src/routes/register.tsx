@@ -33,32 +33,6 @@ export default function SignUp() {
     setLastName(event.target.value);
   };
 
-        const bodyParameters = {
-            "firstName": fName,
-            "lastName": lName,
-            "email": email,
-            "password": password,
-          };
-        
-        Axios.post( 
-          'http://localhost:8080/api/v1/auth/register',
-          bodyParameters
-        )
-        .then((response) => {
-          
-          if (response.status === 200){
-            const token = response.data.token;
-            localStorage.setItem('token', token);
-            localStorage.setItem('email', email);
-            navigate("/main");
-          }
-        })
-        .catch((error) => {
-          console.error("There was an error!", error);
-        });
-      }
-    
-
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
@@ -67,28 +41,35 @@ export default function SignUp() {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
 
-    try {
-      const response = await Axios.post('http://localhost:8080/api/v1/auth/register', {
-        firstName,
-        lastName,
-        email,
-        password,
-      });
-
-      if (response.status === 200) {
-        const token = response.data.token;
-        localStorage.setItem('token', token);
-        navigate('/main');
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-      
-    }
+ const handleSubmit = (event: any) => {
+  event.preventDefault();
+  console.log("bruhv");
+  const bodyParameters = {
+    "firstName": firstName,
+    "lastName": lastName,
+    "email": email,
+    "password": password,
   };
-
+      
+      Axios.post( 
+        'http://localhost:8080/api/v1/auth/register',
+        bodyParameters
+      )
+      .then((response) => {
+        
+        if (response.status === 200){
+          const token = response.data.token;
+          localStorage.setItem('token', token);
+          localStorage.setItem('email', email);
+          navigate("/main");
+        }
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+      });
+    }
+  
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -186,4 +167,5 @@ export default function SignUp() {
       </Container>
     </ThemeProvider>
   );
-}
+        }   
+      

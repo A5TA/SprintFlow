@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Container, TextField, Typography, TextFieldProps } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Axios from 'axios';
@@ -45,8 +45,6 @@ const CreateProject = () => {
   useEffect(() => {
     fetchTeams();
   }, []);
-  
-  };
 
   const createReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,10 +91,10 @@ const CreateProject = () => {
     value: element,
   }));
   
-  //<Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="xs">
+      <Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
         <Box
           sx={{
             marginTop: 8,
