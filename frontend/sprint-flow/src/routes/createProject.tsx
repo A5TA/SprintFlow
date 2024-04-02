@@ -5,6 +5,9 @@ import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
+import Select from 'react-select';
+import 'react-select-search/style.css'
+
 
 const CreateProject = () => {
   const [teamName, setTeamName] = useState("");
@@ -14,13 +17,33 @@ const CreateProject = () => {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
-  const teamNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [data, setData] = useState<string[]>([]);
+
+  const teamNameChange = (event: any) => {
     setTeamName(event.target.value);
   }
 
   const projectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(event.target.value);
   }
+
+  // Fetch team data from API
+  const fetchTeams = async () => {
+    try {
+      const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
   
   const createReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
@@ -63,13 +86,16 @@ const CreateProject = () => {
     createReq(event);
   }
 
+  const options = data.map((element) => ({
+    label: element,
+    value: element,
+  }));
+  
+
   return (
     <div>
         <form onSubmit={handleSaveAndSend}>
-        <label>
-          Enter the name of your team:
-          <input type='text' onChange={teamNameChange} value={teamName}/>
-        </label>
+        <Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
         <br/>
         <label>
           Start Date:

@@ -42,6 +42,7 @@ export default function Register() {
           if (response.status === 200){
             const token = response.data.token;
             localStorage.setItem('token', token);
+            localStorage.setItem('email', email);
             navigate("/main");
           }
         })
