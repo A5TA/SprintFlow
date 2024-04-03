@@ -403,13 +403,6 @@ export default function Projects() {
     });
   };
 
-// <select onChange={handleProjectChange}>
-//           <option value="">Select Project</option>
-//           {Array.from(mapProjects).map(([projectName, projectId], index) => (
-//             <option key={index} value={projectName}>{projectName}</option>
-//           ))}
-//         </select>
-
 
   // JSX rendering
   return (
