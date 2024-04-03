@@ -18,66 +18,43 @@ import Axios from 'axios';
 
 const theme = createTheme();
 
-export default function SignIn() {
+export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-  };
-
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: any) => {
     event.preventDefault();
-
-    try {
-      const response = await Axios.post('http://localhost:8080/api/v1/auth/login', {
-        email,
-        password,
-      });
-
-      if (response.status === 200) {
-        navigate('/main');
+    console.log("bruhv");
+    const bodyParameters = {
+      "email": email,
+      "password": password,
+    };
+        
+        Axios.post( 
+          'http://localhost:8080/api/v1/auth/login',
+          bodyParameters
+        )
+        .then((response) => {
+          
+          if (response.status === 200){
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+            localStorage.setItem('email', email);
+            navigate("/main");
+          }
+        })
+        .catch((error) => {
+          console.error("There was an error!", error);
+        });
       }
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Handle error
-    }
-      
-    const handlePassword = (event: any) => {
-        setPassword(event.target.value);
-    }
-    const handleEmail = (event: any) => {
-        setEmail(event.target.value);
-    }
-    const sendReq = (event: any) => {
-      event.preventDefault(); 
 
-      const bodyParameters = {
-          "email": email,
-          "password": password,
-        };
-      
-      Axios.post( 
-        'http://localhost:8080/api/v1/auth/login',
-        bodyParameters
-      )
-      .then((response) => {
-        console.log(response);
-        if (response.status === 200){
-          const token = response.data.token;
-          localStorage.setItem('token', token);
-          localStorage.setItem('email', email);
-          navigate("/main");
-        }
-      })
-    }
-  };
+const handlePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+}
+const handleEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+}
 
   return (
     <ThemeProvider theme={theme}>
@@ -97,7 +74,7 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -108,7 +85,7 @@ export default function SignIn() {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={handleEmailChange}
+              onChange={handleEmail}
             />
             <TextField
               margin="normal"
@@ -120,14 +97,14 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
               value={password}
-              onChange={handlePasswordChange}
+              onChange={handlePassword}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
             <Button
-              type="submit"
+              onClick={handleSubmit}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}

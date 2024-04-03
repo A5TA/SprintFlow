@@ -3,7 +3,7 @@ import { Box, Button, Container, TextField, Typography, TextFieldProps } from '@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import DatePicker from '@mui/lab/DatePicker';
+import {DatePicker} from '@mui/lab';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import Select from 'react-select';
 import 'react-select-search/style.css'
@@ -94,7 +94,6 @@ const CreateProject = () => {
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="xs">
-      <Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
         <Box
           sx={{
             marginTop: 8,
@@ -107,7 +106,8 @@ const CreateProject = () => {
             Enter Project Details
           </Typography>
           <Box component="form" onSubmit={handleSaveAndSend} sx={{ mt: 1 }}>
-            <TextField
+          <Select onChange={(choice: any) => setTeamName(choice.value)} options={options} placeholder="Choose Your Team"/>
+            {/* <TextField
               margin="normal"
               required
               fullWidth
@@ -118,7 +118,7 @@ const CreateProject = () => {
               autoFocus
               value={teamName}
               onChange={teamNameChange}
-            />
+            /> */}
             <DatePicker
               label="Start Date"
               value={startDate}
