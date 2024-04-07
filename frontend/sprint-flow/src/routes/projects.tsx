@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import Typography from '@mui/material/Typography';
@@ -13,12 +13,13 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const theme = createTheme();
 
+
 interface Project {
   id: string;
   name: string;
 }
 
-interface Task {
+export interface Task {
   id: string;
   name: string;
   description: string;
@@ -29,6 +30,11 @@ interface Task {
 }
 
 export default function Projects() {
+
+
+
+  const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+
   // State for team and project selection
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [selectedTaskProject, setSelectedTaskProject] = useState<string>("");
@@ -64,12 +70,16 @@ export default function Projects() {
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
 
-  const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+  //const {mapProjects, setMapProjects} = useMapProjects();
 
   // Fetch teams and projects on component mount
   useEffect(() => {
     fetchTeams();
   }, []);
+
+  useEffect(() => {
+    console.log(mapProjects);
+  }, [mapProjects]);
 
   useEffect(() => {
     if (selectedTeam !== "") {
@@ -92,24 +102,18 @@ export default function Projects() {
 
   // Function to add project to map
   function addToMap(projectName: string, projectID: string): void {
-      mapProjects.set(projectName, projectID);
+    const updatedMap = mapProjects;
+    updatedMap.set(projectName, projectID);
+    // Update the context state with the new map
+    setMapProjects(updatedMap);
+    console.log(mapProjects);      //setMapProjects(mapProjects);
   }
-
-  // Function to get the project ID by project name
-  function getFromMap(projectName: string) {
-    return mapProjects.get(projectName);
-  } 
-
-  // Function to get project names from map
-  function getProjectNames(): string[] {
-    return Object.keys(mapProjects);
-  }
-
   // Event handlers for form inputs
 
   const handleTeamChange = (event: any) => {
     setSelectedTeam(event.target.value);
   };
+
 
   const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTaskProject(event.target.value);
@@ -368,6 +372,9 @@ export default function Projects() {
     const token = localStorage.getItem('token');
     const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
     const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+
+    const startDateTime = new Date((startDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
+    const endDateTime = new Date((dueDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
     const pointsInt = parseInt(points, 10);
 
     const bodyParameters = {
@@ -402,7 +409,6 @@ export default function Projects() {
       console.log(selectedTaskProject);
     });
   };
-
 
   // JSX rendering
   return (
