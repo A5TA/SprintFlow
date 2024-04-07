@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import Axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,6 +10,8 @@ export default function CTasks() {
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [taskName, setTaskName] = useState("");
     const [points, setPoints] = useState("");
+    
+    // Access mapProjects from context
 
     const handleDescription = (event: any) => {
         setDescription(event.target.value);
@@ -23,6 +25,8 @@ export default function CTasks() {
     const handlePoints = (event: any) => {
         setPoints(event.target.value);
     }
+
+
 
     const sendReq = (event: any) => {
         event.preventDefault();
@@ -101,5 +105,4 @@ export default function CTasks() {
         </form>  
     </div>
     );
-
 }
