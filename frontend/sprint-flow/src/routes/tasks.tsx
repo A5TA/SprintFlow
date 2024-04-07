@@ -2,7 +2,6 @@ import { useState } from "react";
 import Axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { myEventsList } from '../routes/calendar';
 
 export default function CTasks() {
     const [description, setDescription] = useState("");
@@ -28,7 +27,7 @@ export default function CTasks() {
     const sendReq = (event: any) => {
         event.preventDefault();
         const token = localStorage.getItem('token'); 
-        const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
+        const javaStartDate = dueDate ? new Date(dueDate.getTime()) : null;
         const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
         const pointsInt = parseInt(points, 10);
 
@@ -55,12 +54,6 @@ export default function CTasks() {
         .then((response) => {
             if (response.status === 200){
                 console.log("Your good to go!")
-
-                // const startDateTime = new Date(startDate!.toISOString().split('T')[0] + 'T' + startTime);
-                // const endDateTime = new Date(dueDate!.toISOString().split('T')[0] + 'T' + endTime);
-
-                const newEvent = {start: javaStartDate, end: javaDueDate, title: taskName, description: description}
-                myEventsList.push(newEvent);
             }
         })
         .catch((error) => {
