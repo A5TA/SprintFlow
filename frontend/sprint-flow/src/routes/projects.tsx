@@ -96,9 +96,9 @@ export default function Projects() {
       setStartDate(null);
       setDueDate(null);
       setPoints("");
-      setSelectedTaskProject("");
+      //setSelectedTaskProject("");
     }
-  }, [taskCreated, selectedTaskProject]);
+  }, [taskCreated]);
 
   // Function to add project to map
   function addToMap(projectName: string, projectID: string): void {
@@ -263,7 +263,6 @@ export default function Projects() {
     })
     .catch((error) => {
       console.error("There was an error!", error);
-      console.log(selectedTaskProject);
     });
     setEditingTaskId(null);
     resetExpandedProjects();
@@ -292,20 +291,6 @@ export default function Projects() {
       fetchProjects();
     }
   }, [selectedTeam]);
-
-  useEffect(() => {
-    if (taskCreated) {
-      fetchTasks(selectedTaskProject);
-      setTaskCreated(false); 
-
-      setTaskName("");
-      setDescription("");
-      setStartDate(null);
-      setDueDate(null);
-      setPoints("");
-      setSelectedTaskProject("");
-    }
-  }, [taskCreated, selectedTaskProject]);
   
    // Function to fetch teams
 
@@ -406,7 +391,6 @@ export default function Projects() {
     })
     .catch((error) => {
       console.error("There was an error!", error);
-      console.log(selectedTaskProject);
     });
   };
 
