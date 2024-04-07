@@ -16,6 +16,8 @@
     "@mui/lab": "^5.0.0-alpha.169",
     "@mui/material": "^5.15.14",
     "@mui/x-date-pickers": "^7.1.0",
+    "@splinetool/react-spline": "^2.2.6",
+    "@splinetool/runtime": "^1.0.93",
     "axios": "^1.6.8",
     "dayjs": "^1.11.10",
     "localforage": "^1.10.0",
@@ -26,6 +28,8 @@
     "react-datepicker": "^6.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
+    "react-select": "^5.8.0",
+    "react-select-search": "^4.1.7",
     "react-time-picker": "^6.6.0",
     "sort-by": "^1.2.0"
   },
