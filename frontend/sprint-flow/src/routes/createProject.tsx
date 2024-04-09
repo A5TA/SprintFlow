@@ -17,12 +17,7 @@ const CreateProject = () => {
   const [projectName, setProjectName] = useState('');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
-
   const [data, setData] = useState<string[]>([]);
-
-  const teamNameChange = (event: any) => {
-    setTeamName(event.target.value);
-  };
 
   const projectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(event.target.value);

@@ -14,7 +14,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const theme = createTheme();
 
 
-interface Project {
+export interface Project {
   id: string;
   name: string;
 }
@@ -30,8 +30,6 @@ export interface Task {
 }
 
 export default function Projects() {
-
-
 
   const [mapProjects, setMapProjects] = useState(new Map<string, string>());
 

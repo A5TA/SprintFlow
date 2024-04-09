@@ -16,7 +16,6 @@ function MyForm({ setShowForm }: FormProps) {
   const [startTime, setStartTime] = useState<string>('10:00');
   const [endTime, setEndTime] = useState<string>('10:00');
 
-
   
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
