@@ -10,9 +10,14 @@ import CTasks from './tasks';
 function App() {
   const localizer = momentLocalizer(moment);
 
+  const [update, setUpdate] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const token = localStorage.getItem('token');
   const [tasks, setTasks] = useState<any[]>([]); // Specify type for tasks
+
+  const handleTaskCreation = () => {
+    setUpdate(true);
+  }
 
   const fetchTasks = async () => {
     try {
@@ -39,15 +44,17 @@ function App() {
     fetchTasks();
   }, []); // Run once on component mount
 
-  // Log a message when the component re-renders
-  console.log("App component re-rendered");
+  useEffect(() => {
+    fetchTasks();
+    setUpdate(false);
+  }, [update]);
 
   return (
     <div className="App">
       <CreateEventButton forMethod={setShowForm} />
       {showForm && <MyForm setShowForm={setShowForm} />}
       {showForm && <button type="button" onClick={() => setShowForm(false)}>X</button>}
-      <CTasks />
+      <CTasks UpdateCalendar = {handleTaskCreation}/>
       <Calendar
         localizer={localizer}
         events={tasks}
