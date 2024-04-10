@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import Typography from '@mui/material/Typography';
@@ -10,9 +10,15 @@ import Container from '@mui/material/Container';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/material';
 
 const theme = createTheme();
 
+interface Email {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export interface Project {
   id: string;
@@ -69,6 +75,21 @@ export default function Projects() {
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
 
+  // Emails for assigning the task
+  const [emailList, setEmailList] = useState<Email[]>([]);
+  const [emailSearchQuery, setEmailSearchQuery] = useState<string | null>(null);
+  const [showDropdownForEmail, setShowDropdownForEmail] = useState<boolean>(false);
+  const handleSearchChange = (e: any) => {
+    setEmailSearchQuery(e.target.value);
+  };
+
+  const filteredEmails = emailList.filter((email) => {
+    if (emailSearchQuery === null) {
+      return true; //we can just show all of them
+    }
+    return `${email.firstName} ${email.lastName} ${email.email}`.toLowerCase().includes(emailSearchQuery.toLowerCase());
+  });
+
   //const {mapProjects, setMapProjects} = useMapProjects();
 
   // Fetch teams and projects on component mount
@@ -80,12 +101,14 @@ export default function Projects() {
     console.log(mapProjects);
   }, [mapProjects]);
 
+
   useEffect(() => {
     if (selectedTeam !== "") {
       fetchProjects();
       setTeamChanged(false);
     }
   }, [teamChanged]);
+
 
   useEffect(() => {
     if (taskCreated) {
@@ -259,8 +282,11 @@ export default function Projects() {
     )
     .then((response) => {
       if (response.status === 200){
-        console.log("Task assigned successfully!");
-        setTaskCreated(true);      }
+        console.log("Task assigned successfully with email " + assignEmail);
+        setTaskCreated(true);  
+        setAssignEmail("")
+        setEmailSearchQuery(null); 
+      }
     })
     .catch((error) => {
       console.error("There was an error!", error);
@@ -296,6 +322,7 @@ export default function Projects() {
    // Function to fetch teams
 
   const fetchProjects = async () => {
+    console.log("gettingp projects for ", selectedTeam)
     try {
         mapProjects.clear();
         const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
@@ -315,10 +342,11 @@ export default function Projects() {
             initialExpandedState[project.id] = false;
         });
         setExpandedProjects(initialExpandedState);
+        fetchAllUsersOnTeam(); //we need to show all the users on the team
     } catch (error) {
         console.error('Error fetching projects:', error);
     }
-};
+  };
 
 
   // Fetch tasks for the selected project from API
@@ -395,6 +423,37 @@ export default function Projects() {
       console.error("There was an error!", error);
     });
   };
+
+  //Get all users on team selected and logic to make the dropdown work
+  const fetchAllUsersOnTeam = async () => {
+    try {
+        const response = await Axios.get(`http://localhost:8080/api/v1/team-controller/getAllUsersForTeam/${selectedTeam}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        // console.log("Users are:", response)
+        setEmailList(response.data.data)
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+    }
+  };
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      inputRef.current &&
+      !inputRef.current.contains(event.target as Node) &&
+      listRef.current &&
+      !listRef.current.contains(event.target as Node)
+    ) {
+      setShowDropdownForEmail(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside); //This is to understand what the user is clicking
 
   // JSX rendering
   return (
@@ -480,22 +539,50 @@ export default function Projects() {
                     <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
                   </label>
                   <br />
-                  <label>
-                    Assign Task:
-                    <input type="text" value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)} />
-                  </label>
-                  <button onClick={() => {
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div>
+                      <TextField
+                        label="Search Assignee"
+                        type="text"
+                        value={emailSearchQuery || ''}
+                        onChange={handleSearchChange}
+                        onClick={() => setShowDropdownForEmail(true)}
+                        margin="normal"
+                        inputRef={inputRef}
+                      />
+                      <Popper open={showDropdownForEmail} anchorEl={inputRef.current} placement="bottom-start">
+                        <Paper>
+                        <List ref={listRef}>
+                          {filteredEmails.map((email, index) => (
+                            <ListItem key={index} onClick={(e) => {
+                              setAssignEmail(email.email)
+                              handleSearchChange({ target: { value: `${email.firstName} ${email.lastName}` } });                            
+                              }}>
+                              <ListItemText primary={`${email.firstName} ${email.lastName}`} secondary={email.email} />
+                            </ListItem>
+                          ))}
+                        </List>
+                        </Paper>
+                      </Popper>
+                      
+                    </div>
+                    <button style={{ height: '30px', marginLeft: '10px', padding: '5px 10px', }}
+                     onClick={() => {
                     assignTaskReq(task);
                     cancelEditing();
                     toggleProject({ id: projectId, name: projectName });
                   }}>Assign</button>
-                  <br />
+                  </div>
                   <button onClick={() => {
                     saveEditedTask(task);
                     cancelEditing();
                     toggleProject({ id: projectId, name: projectName });
                   }}>Save</button>
-                  <button onClick={() => cancelEditing()}>Cancel</button>
+                  <button onClick={() => {
+                    cancelEditing()
+                    setAssignEmail("")
+                    setEmailSearchQuery(null);    
+                  }}>Cancel</button>
                 </div>
               )}
             </li>

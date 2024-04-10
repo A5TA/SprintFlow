@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${local_db_url}
-    username: ${local_db_username}
-    password: ${local_db_password}
+    url: jdbc:postgresql://dpg-cmsp0kv109ks739vi9og-a.oregon-postgres.render.com:5432/agiledatabase
+    username: themainuser
+    password: kMiJq6BMfQfzPYH761nXqjMtRlWCuvWK
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
