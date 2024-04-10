@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/calendar",
-    element: <Calendar />,
+    element: <Calendar/>,
   },
   {
     path: "/createTeam",
@@ -70,7 +70,7 @@ const router = createBrowserRouter([
 
 const App = () => {
   return (
-      <RouterProvider router={router} />
+     <RouterProvider router={router} />
   );
 };
 
