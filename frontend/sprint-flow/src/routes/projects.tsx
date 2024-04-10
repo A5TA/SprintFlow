@@ -43,6 +43,7 @@ export default function Projects() {
   //const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const email = localStorage.getItem('email');
+  const [teamChanged, setTeamChanged] = useState(false);
   
   // State for managing project expansion and tasks
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -82,8 +83,9 @@ export default function Projects() {
   useEffect(() => {
     if (selectedTeam !== "") {
       fetchProjects();
+      setTeamChanged(false);
     }
-  }, [selectedTeam]);
+  }, [teamChanged]);
 
   useEffect(() => {
     if (taskCreated) {
@@ -110,6 +112,7 @@ export default function Projects() {
 
   const handleTeamChange = (event: any) => {
     setSelectedTeam(event.target.value);
+    setTeamChanged(true);
   };
 
 
@@ -294,6 +297,7 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
+        mapProjects.clear();
         const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -423,8 +427,8 @@ export default function Projects() {
           {mapProjects.size > 0 ? (
             <div>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
-  {Array.from(mapProjects).map(([projectName, projectId], index) => (
-    <li key={index} style={{ marginBottom: '5px' }}>
+  {Array.from(mapProjects).map(([projectName, projectId]) => (
+    <li key={projectId} style={{ marginBottom: '5px' }}>
       <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
         {expandedProjects[projectId] ? '-' : '>'}
       </button>

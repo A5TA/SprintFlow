@@ -6,6 +6,9 @@ import CreateEventButton from '../components/createEventButton';
 import MyForm from "../components/eventModal";
 import Axios from 'axios';
 import CTasks from './tasks';
+import "../index.css";
+import CustomAgendaView from '../components/customAgendaView';
+
 
 function App() {
   const localizer = momentLocalizer(moment);
@@ -18,6 +21,15 @@ function App() {
   const handleTaskCreation = () => {
     setUpdate(true);
   }
+
+  const EventComponent = ({ event }) => {
+    return (
+      <div>
+        <strong>{event.title}</strong> {/* Display the event title */}
+        <p>{event.description}</p> {/* Display the event description */}
+      </div>
+    );
+  };
 
   const fetchTasks = async () => {
     try {
@@ -58,6 +70,13 @@ function App() {
       <Calendar
         localizer={localizer}
         events={tasks}
+        views={{
+            day: true,
+            week: true,
+            month: true,
+            agenda: CustomAgendaView,
+        } as any}
+        components={{event: EventComponent}}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 840, width: 1450 }}

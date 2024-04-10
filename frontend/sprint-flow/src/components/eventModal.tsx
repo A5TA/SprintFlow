@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import DatePicker from "react-datepicker";
-import TimePicker from 'react-time-picker';
 
 import "react-datepicker/dist/react-datepicker.css";
+
+import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 
 interface FormProps {

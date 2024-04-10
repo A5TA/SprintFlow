@@ -5,6 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import Select from 'react-select';
 import 'react-select-search/style.css'
 import { Project } from "./projects";
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
 
 export default function CTasks({UpdateCalendar}) {
     const [description, setDescription] = useState("");
@@ -18,6 +20,8 @@ export default function CTasks({UpdateCalendar}) {
     const [searchStatus, setSearchStatus] = useState(false);
     const [mapProjects, setMapProjects] = useState(new Map<string, string>());
     const token = localStorage.getItem('token');
+    const [startTime, setStartTime] = useState<string>('10:00');
+    const [endTime, setEndTime] = useState<string>('10:00');
 
     
     // Access mapProjects from context
@@ -31,6 +35,20 @@ export default function CTasks({UpdateCalendar}) {
     const handlePoints = (event: any) => {
         setPoints(event.target.value);
     }
+
+    // const changeStartTime= (timeValue: string) => {
+    //   if (timeValue !== null)
+    //   {
+    //     setStartTime(timeValue);
+    //   }
+    // };
+
+    // const changeEndTime= (timeValue: string) => {
+    //   if (timeValue !== null)
+    //   {
+    //     setStartTime(timeValue);
+    //   }
+    // };
 
     useEffect(() => {
       fetchTeams();
@@ -82,8 +100,8 @@ export default function CTasks({UpdateCalendar}) {
     const sendReq = (event: any) => {
         event.preventDefault();
         const token = localStorage.getItem('token'); 
-        const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
-        const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+        const javaStartDate = startDate ? new Date(startDate.toISOString().split('T')[0] + 'T' + startTime) : null;
+        const javaDueDate = dueDate ? new Date(dueDate.toISOString().split('T')[0] + 'T' + endTime) : null;
         const pointsInt = parseInt(points, 10);
 
         const bodyParameters = {
@@ -152,11 +170,13 @@ export default function CTasks({UpdateCalendar}) {
         <label>
           Start Date:
           <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
+          <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
         </label>
         <br/>
         <label>
           End Date:
           <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
+          <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
         </label>
         <br/>
         <label>
