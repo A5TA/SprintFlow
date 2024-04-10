@@ -5,17 +5,13 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link, useNavigate } from "react-router-dom";  
+import { Link } from "react-router-dom";  
+import  handleNavigates  from '../services/apiServices';
 
 const theme = createTheme();
 
 export default function Welcome() {
-  const navigate = useNavigate();
-    const handleLogout = (event: any) => {
-        event.preventDefault();
-        localStorage.clear();
-        navigate("/");
-    }
+    const {handleLogout} = handleNavigates();
     return (
         <ThemeProvider theme={theme}>
             <Container maxWidth="md">

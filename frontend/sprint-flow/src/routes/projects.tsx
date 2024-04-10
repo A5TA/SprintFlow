@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -11,6 +11,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/material';
+import handleNavigates from "../services/apiServices"
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
+import CTasks from '../components/createTaskInProjects';
 
 const theme = createTheme();
 
@@ -37,6 +41,10 @@ export interface Task {
 
 export default function Projects() {
 
+  const { handleLogout, handleNavigate } = handleNavigates();
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("email");
+
   const [mapProjects, setMapProjects] = useState(new Map<string, string>());
 
   // State for team and project selection
@@ -44,11 +52,9 @@ export default function Projects() {
   const [selectedTaskProject, setSelectedTaskProject] = useState<string>("");
   
   // State for authentication token and fetched data
-  const token: string | null = localStorage.getItem('token');
   const [data, setData] = useState<string[]>([]);
   //const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const email = localStorage.getItem('email');
   const [teamChanged, setTeamChanged] = useState(false);
   
   // State for managing project expansion and tasks
@@ -58,7 +64,7 @@ export default function Projects() {
 
    // Task creation state
   const [description, setDescription] = useState("");
-  const [projectName, setProjectName] = useState("");
+  // const [projectName, setProjectName] = useState("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [taskName, setTaskName] = useState("");
@@ -74,6 +80,9 @@ export default function Projects() {
   const [editedTaskPoints, setEditedTaskPoints] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
+
+  const [startTime, setStartTime] = useState<string>('10:00');
+  const [endTime, setEndTime] = useState<string>('10:00');
 
   // Emails for assigning the task
   const [emailList, setEmailList] = useState<Email[]>([]);
@@ -220,9 +229,9 @@ export default function Projects() {
     setDescription(event.target.value);
   };
 
-  const handleProjectName = (event: any) => {
-    setProjectName(event.target.value);
-  };
+  // const handleProjectName = (event: any) => {
+  //   setProjectName(event.target.value);
+  // };
 
   const handleTaskName = (event: any) => {
     setTaskName(event.target.value);
@@ -385,11 +394,11 @@ export default function Projects() {
   const sendReq = (event: any) => {
     event.preventDefault();
     const token = localStorage.getItem('token');
-    const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
-    const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+    const javaStartDate = startDate ? new Date(startDate.toISOString().split('T')[0] + 'T' + startTime) : null;
+    const javaDueDate = dueDate ? new Date(dueDate.toISOString().split('T')[0] + 'T' + endTime) : null;
 
-    const startDateTime = new Date((startDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
-    const endDateTime = new Date((dueDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
+    // const startDateTime = new Date((startDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
+    // const endDateTime = new Date((dueDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
     const pointsInt = parseInt(points, 10);
 
     const bodyParameters = {
@@ -472,6 +481,22 @@ export default function Projects() {
           <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
             Join Team
           </Button>
+
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 90 }}>
+        <button onClick={() => handleNavigate("/calendar")}>
+          Calendar
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 175 }}>
+        <button onClick={() => handleNavigate("/main")}>
+          Home
+        </button>
+      </div>
           <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
             <MenuItem value="" disabled>Select Team</MenuItem>
             {data.map((team: string, index: number) => (
@@ -608,8 +633,8 @@ export default function Projects() {
         <label>Select Project:</label>
         <select onChange={handleProjectChange}>
           <option value="">Select Project</option>
-          {Array.from(mapProjects).map(([projectName, projectId], index) => (
-            <option key={index} value={projectName}>{projectName}</option>
+          {Array.from(mapProjects).map(([projectName, projectId]) => (
+            <option key={projectId} value={projectName}>{projectName}</option>
           ))}
         </select>
         <form id="form" onSubmit={sendReq}>
@@ -626,11 +651,13 @@ export default function Projects() {
           <label>
             Start Date:
             <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
+            <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
           </label>
           <br/>
           <label>
             End Date:
             <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
+            <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
           </label>
           <br/>
           <label>

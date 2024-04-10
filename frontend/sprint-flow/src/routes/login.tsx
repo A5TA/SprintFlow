@@ -39,6 +39,7 @@ export default function Login() {
           
           if (response.status === 200){
             const token = response.data.token;
+            setEmail(response.data.email);
             localStorage.setItem('token', token);
             localStorage.setItem('email', email);
             navigate("/main");
