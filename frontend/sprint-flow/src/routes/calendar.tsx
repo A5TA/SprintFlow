@@ -8,25 +8,53 @@ import Axios from 'axios';
 import CTasks from './tasks';
 import "../index.css";
 import CustomAgendaView from '../components/customAgendaView';
+import handleNavigates from '../services/apiServices';
+import { textAlign } from '@mui/system';
+
+
 
 
 function App() {
+  const {handleLogout, handleNavigate} = handleNavigates();
   const localizer = momentLocalizer(moment);
-
-  const [update, setUpdate] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
+  // const [showForm, setShowForm] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]); // Specify type for tasks
 
+  const [update, setUpdate] = useState(false);
+
   const handleTaskCreation = () => {
-    setUpdate(true);
-  }
+  setUpdate(true);
+}
+
+const descriptionStyle = {
+  paddingLeft: "10px",
+  paddingRight: "10px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box",
+};
+
+const containerStyle: React.CSSProperties = {
+  width: "200px",
+  textAlign: "center"
+};
 
   const EventComponent = ({ event }) => {
     return (
-      <div>
-        <strong>{event.title}</strong> {/* Display the event title */}
-        <p>{event.description}</p> {/* Display the event description */}
+      <div style={containerStyle}>
+        <strong style={{color: "black", fontSize:"20px"}}>
+          <center>{event.title}</center>
+          </strong>
+        <p style={{paddingLeft: "5px",
+                  paddingRight: "5px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"}}>
+          {event.description}
+        </p>
+        <em>
+          <center>{event.points} points</center>
+        </em>
       </div>
     );
   };
@@ -63,10 +91,27 @@ function App() {
 
   return (
     <div className="App">
-      <CreateEventButton forMethod={setShowForm} />
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 90 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 175 }}>
+        <button onClick={() => handleNavigate("/main")}>
+          Home
+        </button>
+      </div>
+      {/* <CreateEventButton forMethod={setShowForm} />
       {showForm && <MyForm setShowForm={setShowForm} />}
-      {showForm && <button type="button" onClick={() => setShowForm(false)}>X</button>}
+      {showForm && <button type="button" onClick={() => setShowForm(false)}>X</button>} */}
+      <div style={{padding: "70px"}}>
       <CTasks UpdateCalendar = {handleTaskCreation}/>
+      </div>
       <Calendar
         localizer={localizer}
         events={tasks}
@@ -74,7 +119,7 @@ function App() {
             day: true,
             week: true,
             month: true,
-            agenda: CustomAgendaView,
+            agenda: true,
         } as any}
         components={{event: EventComponent}}
         startAccessor="start"

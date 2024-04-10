@@ -2,18 +2,15 @@ import React, { useEffect, useState } from 'react'
 import Axios from 'axios';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+import handleNavigates from '../services/apiServices';
 
 const joinTeam = () => {
+    const {handleNavigate} = handleNavigates();
     const [teamName, setTeamName] = useState("");
     const navigate = useNavigate();
     const [allTeams, setAllTeams] = useState<string[]>([]);
     const [userTeams, setUserTeams] = useState<string[]>([]);
-
-    const token = localStorage.getItem('token');
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTeamName(event.target.value);
-    }
+    const token = localStorage.getItem("token");
 
     const fetchAllTeams = async () => {
       try {
@@ -84,6 +81,11 @@ const joinTeam = () => {
 
   return (
     <div>
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
         <h2>
             Join a team:
         </h2>

@@ -7,10 +7,12 @@ import {DatePicker} from '@mui/lab';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import Select from 'react-select';
 import 'react-select-search/style.css'
+import handleNavigates from '../services/apiServices';
 
 const theme = createTheme();
 
 const CreateProject = () => {
+  const {handleNavigate} = handleNavigates();
   const [teamName, setTeamName] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -97,6 +99,11 @@ const CreateProject = () => {
             alignItems: 'center',
           }}
         >
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
           <Typography component="h1" variant="h5">
             Enter Project Details
           </Typography>
