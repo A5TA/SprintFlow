@@ -14,7 +14,6 @@ import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/mat
 import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
-import CTasks from '../components/createTaskInProjects';
 
 const theme = createTheme();
 
@@ -661,7 +660,7 @@ export default function Projects() {
           </label>
           <br/>
           <label>
-            Points:
+            Points: 
             <input onChange={handlePoints} value={points} type='text'/>
           </label>
           <br/>
