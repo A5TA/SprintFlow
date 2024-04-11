@@ -18,6 +18,7 @@ import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/mat
 import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
+
 import CTasks from '../components/createTaskInProjects';
 import DatePicker from "react-datepicker";
 
@@ -725,7 +726,6 @@ return (
               Start Date:
             <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
             <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
-
             </Grid>
             <Grid item xs={12}>
               End Date:
