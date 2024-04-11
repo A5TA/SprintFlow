@@ -1,12 +1,11 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
+import ReactDOM from "react-dom";
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import "./index.css";
 import Root from "./routes/root";
-import Calendar from "./routes/calendar"
+import Calendar from "./routes/calendar";
 import CTeam from "./routes/createTeam";
 import Login from "./routes/login";
 import Register from "./routes/register";
@@ -21,54 +20,58 @@ import JoinTeam from "./routes/joinTeam";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root/>,
+    element: <Root />,
   },
   {
     path: "/calendar",
     element: <Calendar/>,
   },
   {
-    path: "/createTeam", 
-    element: <CTeam/>
+    path: "/createTeam",
+    element: <CTeam />,
   },
   {
-    path: "/login", 
-    element: <Login/>
+    path: "/login",
+    element: <Login />,
   },
   {
-    path: "/register", 
-    element: <Register/>
+    path: "/register",
+    element: <Register />,
   },
   {
-    path: "/forgotPassword", 
-    element: <Password/>
+    path: "/forgotPassword",
+    element: <Password />,
   },
   {
-    path: "/projects", 
-    element: <Projects/>
+    path: "/projects",
+    element: <Projects />,
   },
   {
-    path: "/createTask", 
-    element: <CTasks/>
+    path: "/createTask",
+    element: <CTasks />,
   },
   {
-    path: "/main", 
-    element: <Welcome/>
+    path: "/main",
+    element: <Welcome />,
   },
   {
-    path: "/projects/createTeam", 
-    element: <CTeam/>
+    path: "/projects/createTeam",
+    element: <CTeam />,
   },
   {
-    path: "/projects/createProject", 
-    element: <CreateProject/>
+    path: "/projects/createProject",
+    element: <CreateProject />,
   },
   {
-    path: "/projects/joinTeam", 
-    element: <JoinTeam/>
+    path: "/projects/joinTeam",
+    element: <JoinTeam />,
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-    <RouterProvider router={router} />
-);
+const App = () => {
+  return (
+     <RouterProvider router={router} />
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById("root"));

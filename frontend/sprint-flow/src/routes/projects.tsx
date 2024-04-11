@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -16,15 +16,26 @@ import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Modal from '@mui/material/Modal';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/material';
+import handleNavigates from "../services/apiServices"
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
+import CTasks from '../components/createTaskInProjects';
 
 const theme = createTheme();
 
-interface Project {
+interface Email {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface Project {
   id: string;
   name: string;
 }
 
-interface Task {
+export interface Task {
   id: string;
   name: string;
   description: string;
@@ -35,16 +46,22 @@ interface Task {
 }
 
 export default function Projects() {
+
+  const { handleLogout, handleNavigate } = handleNavigates();
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("email");
+
+  const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+
   // State for team and project selection
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [selectedTaskProject, setSelectedTaskProject] = useState<string>("");
   const [open, setOpen] = useState(false); // State for modal open/close
   
   // State for authentication token and fetched data
-  const token: string | null = localStorage.getItem('token');
   const [data, setData] = useState<string[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const email = localStorage.getItem('email');
+  const [teamChanged, setTeamChanged] = useState(false);
   
   // State for managing project expansion and tasks
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -53,7 +70,7 @@ export default function Projects() {
 
    // Task creation state
   const [description, setDescription] = useState("");
-  const [projectName, setProjectName] = useState("");
+  // const [projectName, setProjectName] = useState("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [taskName, setTaskName] = useState("");
@@ -70,7 +87,25 @@ export default function Projects() {
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
 
-  const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+  const [startTime, setStartTime] = useState<string>('10:00');
+  const [endTime, setEndTime] = useState<string>('10:00');
+
+  // Emails for assigning the task
+  const [emailList, setEmailList] = useState<Email[]>([]);
+  const [emailSearchQuery, setEmailSearchQuery] = useState<string | null>(null);
+  const [showDropdownForEmail, setShowDropdownForEmail] = useState<boolean>(false);
+  const handleSearchChange = (e: any) => {
+    setEmailSearchQuery(e.target.value);
+  };
+
+  const filteredEmails = emailList.filter((email) => {
+    if (emailSearchQuery === null) {
+      return true; //we can just show all of them
+    }
+    return `${email.firstName} ${email.lastName} ${email.email}`.toLowerCase().includes(emailSearchQuery.toLowerCase());
+  });
+
+  //const {mapProjects, setMapProjects} = useMapProjects();
 
   // Fetch teams and projects on component mount
   useEffect(() => {
@@ -78,10 +113,17 @@ export default function Projects() {
   }, []);
 
   useEffect(() => {
+    console.log(mapProjects);
+  }, [mapProjects]);
+
+
+  useEffect(() => {
     if (selectedTeam !== "") {
       fetchProjects();
+      setTeamChanged(false);
     }
-  }, [selectedTeam]);
+  }, [teamChanged]);
+
 
   useEffect(() => {
     if (taskCreated) {
@@ -92,13 +134,17 @@ export default function Projects() {
       setStartDate(null);
       setDueDate(null);
       setPoints("");
-      setSelectedTaskProject("");
+      //setSelectedTaskProject("");
     }
-  }, [taskCreated, selectedTaskProject]);
+  }, [taskCreated]);
 
   // Function to add project to map
   function addToMap(projectName: string, projectID: string): void {
-      mapProjects.set(projectName, projectID);
+    const updatedMap = mapProjects;
+    updatedMap.set(projectName, projectID);
+    // Update the context state with the new map
+    setMapProjects(updatedMap);
+    console.log(mapProjects);      //setMapProjects(mapProjects);
   }
 
   // Function to get the project ID by project name
@@ -120,6 +166,19 @@ export default function Projects() {
   const handleProjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSelectedTaskProject(event.target.value as string);
     fetchTasks(event.target.value as string);
+
+  // Event handlers for form inputs
+
+  const handleTeamChange = (event: any) => {
+    setSelectedTeam(event.target.value);
+    setTeamChanged(true);
+  };
+
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTaskProject(event.target.value);
+    fetchTasks(event.target.value);
+
   };
 
   // Function to handle task editing
@@ -198,9 +257,15 @@ export default function Projects() {
     setDescription(event.target.value);
   };
 
+
   const handleProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(event.target.value);
   };
+
+  // const handleProjectName = (event: any) => {
+  //   setProjectName(event.target.value);
+  // };
+
 
   const handleTaskName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTaskName(event.target.value);
@@ -261,13 +326,15 @@ export default function Projects() {
     )
     .then((response) => {
       if (response.status === 200){
-        console.log("Task assigned successfully!");
-        setTaskCreated(true);
+        console.log("Task assigned successfully with email " + assignEmail);
+        setTaskCreated(true);  
+        setAssignEmail("")
+        setEmailSearchQuery(null); 
+
       }
     })
     .catch((error) => {
       console.error("There was an error!", error);
-      console.log(selectedTaskProject);
     });
     setEditingTaskId(null);
     resetExpandedProjects();
@@ -296,25 +363,13 @@ export default function Projects() {
       fetchProjects();
     }
   }, [selectedTeam]);
-
-  useEffect(() => {
-    if (taskCreated) {
-      fetchTasks(selectedTaskProject);
-      setTaskCreated(false); 
-
-      setTaskName("");
-      setDescription("");
-      setStartDate(null);
-      setDueDate(null);
-      setPoints("");
-      setSelectedTaskProject("");
-    }
-  }, [taskCreated, selectedTaskProject]);
   
    // Function to fetch teams
 
   const fetchProjects = async () => {
+    console.log("gettingp projects for ", selectedTeam)
     try {
+        mapProjects.clear();
         const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -332,10 +387,11 @@ export default function Projects() {
             initialExpandedState[project.id] = false;
         });
         setExpandedProjects(initialExpandedState);
+        fetchAllUsersOnTeam(); //we need to show all the users on the team
     } catch (error) {
         console.error('Error fetching projects:', error);
     }
-};
+  };
 
 
   // Fetch tasks for the selected project from API
@@ -374,8 +430,11 @@ export default function Projects() {
   const sendReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const token = localStorage.getItem('token');
-    const javaStartDate = startDate ? new Date(startDate.getTime()) : null;
-    const javaDueDate = dueDate ? new Date(dueDate.getTime()) : null;
+    const javaStartDate = startDate ? new Date(startDate.toISOString().split('T')[0] + 'T' + startTime) : null;
+    const javaDueDate = dueDate ? new Date(dueDate.toISOString().split('T')[0] + 'T' + endTime) : null;
+
+    // const startDateTime = new Date((startDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
+    // const endDateTime = new Date((dueDate?.toISOString().split('T')[0] ?? '') + 'T00:00');
     const pointsInt = parseInt(points, 10);
 
     const bodyParameters = {
@@ -407,7 +466,6 @@ export default function Projects() {
     })
     .catch((error) => {
       console.error("There was an error!", error);
-      console.log(selectedTaskProject);
     });
   };
 
@@ -524,6 +582,190 @@ return (
                 </li>
               ))}
             </ul>
+  //Get all users on team selected and logic to make the dropdown work
+  const fetchAllUsersOnTeam = async () => {
+    try {
+        const response = await Axios.get(`http://localhost:8080/api/v1/team-controller/getAllUsersForTeam/${selectedTeam}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        // console.log("Users are:", response)
+        setEmailList(response.data.data)
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+    }
+  };
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      inputRef.current &&
+      !inputRef.current.contains(event.target as Node) &&
+      listRef.current &&
+      !listRef.current.contains(event.target as Node)
+    ) {
+      setShowDropdownForEmail(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside); //This is to understand what the user is clicking
+
+  // JSX rendering
+  return (
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Teams
+          </Typography>
+          {data.map((team: string, index: number) => (
+              <li key={index} value={team}>{team}</li>
+            ))}
+          <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
+            Create Team
+          </Button>
+          <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
+            Join Team
+          </Button>
+
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 90 }}>
+        <button onClick={() => handleNavigate("/calendar")}>
+          Calendar
+        </button>
+      </div>
+      <div style={{position: 'absolute', top: 20, right: 175 }}>
+        <button onClick={() => handleNavigate("/main")}>
+          Home
+        </button>
+      </div>
+          <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
+            <MenuItem value="" disabled>Select Team</MenuItem>
+            {data.map((team: string, index: number) => (
+              <MenuItem key={index} value={team}>{team}</MenuItem>
+            ))}
+          </Select>
+        </Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Projects
+          </Typography>
+          {mapProjects.size > 0 ? (
+            <div>
+            <ul style={{ listStyleType: 'none', padding: 0 }}>
+  {Array.from(mapProjects).map(([projectName, projectId]) => (
+    <li key={projectId} style={{ marginBottom: '5px' }}>
+      <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
+        {expandedProjects[projectId] ? '-' : '>'}
+      </button>
+      <span>{projectName}</span>
+      {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
+        <ul>
+          {/* Render tasks for the selected project */}
+          {projectTasks[projectName].map((task: Task) => (
+            <li key={task.id}>
+              {task.name}
+              <span onClick={() => handleEditTask(task)}>🖉</span>
+              {/* Additional content for editing task */}
+              {task.id === editingTaskId && (
+                <div>
+                  <label>
+                    Name:
+                    <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
+                  </label>
+                  <br />
+                  <label>
+                    Description:
+                    <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
+                  </label>
+                  <br />
+                  <label>
+                    Start Date:
+                    <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
+                  </label>
+                  <br />
+                  <label>
+                    End Date:
+                    <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
+                  </label>
+                  <br />
+                  <label>
+                    Points:
+                    <input
+                      value={editedTaskPoints?.toString()}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
+                        setEditedTaskPoints(parsedValue);
+                      }}
+                    />
+                  </label>
+                  <br />
+                  <label>
+                    Status:
+                    <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
+                  </label>
+                  <br />
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div>
+                      <TextField
+                        label="Search Assignee"
+                        type="text"
+                        value={emailSearchQuery || ''}
+                        onChange={handleSearchChange}
+                        onClick={() => setShowDropdownForEmail(true)}
+                        margin="normal"
+                        inputRef={inputRef}
+                      />
+                      <Popper open={showDropdownForEmail} anchorEl={inputRef.current} placement="bottom-start">
+                        <Paper>
+                        <List ref={listRef}>
+                          {filteredEmails.map((email, index) => (
+                            <ListItem key={index} onClick={(e) => {
+                              setAssignEmail(email.email)
+                              handleSearchChange({ target: { value: `${email.firstName} ${email.lastName}` } });                            
+                              }}>
+                              <ListItemText primary={`${email.firstName} ${email.lastName}`} secondary={email.email} />
+                            </ListItem>
+                          ))}
+                        </List>
+                        </Paper>
+                      </Popper>
+                      
+                    </div>
+                    <button style={{ height: '30px', marginLeft: '10px', padding: '5px 10px', }}
+                     onClick={() => {
+                    assignTaskReq(task);
+                    cancelEditing();
+                    toggleProject({ id: projectId, name: projectName });
+                  }}>Assign</button>
+                  </div>
+                  <button onClick={() => {
+                    saveEditedTask(task);
+                    cancelEditing();
+                    toggleProject({ id: projectId, name: projectName });
+                  }}>Save</button>
+                  <button onClick={() => {
+                    cancelEditing()
+                    setAssignEmail("")
+                    setEmailSearchQuery(null);    
+                  }}>Cancel</button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  ))}
+</ul>
           </div>
         ) : (
           <Typography variant="body1">No projects available for the selected team</Typography>
@@ -550,6 +792,46 @@ return (
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button variant="contained" color="primary" onClick={handleOpen}>
+      </Container>
+
+      <div style={{position: 'absolute', top: 200, right: 50 }}>
+        <h2> Create Task In Project</h2>
+        <label>Select Project:</label>
+        <select onChange={handleProjectChange}>
+          <option value="">Select Project</option>
+          {Array.from(mapProjects).map(([projectName, projectId]) => (
+            <option key={projectId} value={projectName}>{projectName}</option>
+          ))}
+        </select>
+        <form id="form" onSubmit={sendReq}>
+          <label>
+            Task Name:
+            <input onChange={handleTaskName} value={taskName} type='text'/>
+          </label>
+          <br/>
+          <label>
+            Description:
+            <input onChange={handleDescription} value={description} type='text'/>
+          </label>
+          <br/>
+          <label>
+            Start Date:
+            <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
+            <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
+          </label>
+          <br/>
+          <label>
+            End Date:
+            <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
+            <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
+          </label>
+          <br/>
+          <label>
+            Points:
+            <input onChange={handlePoints} value={points} type='text'/>
+          </label>
+          <br/>
+          <button type='submit'>
             Create Task
           </Button>
         </Box>

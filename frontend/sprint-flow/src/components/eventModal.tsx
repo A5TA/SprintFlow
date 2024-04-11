@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { myEventsList } from '../routes/calendar';
 import DatePicker from "react-datepicker";
-import TimePicker from 'react-time-picker';
 
 import "react-datepicker/dist/react-datepicker.css";
+
+import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 
 interface FormProps {
@@ -16,6 +16,7 @@ function MyForm({ setShowForm }: FormProps) {
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [startTime, setStartTime] = useState<string>('10:00');
   const [endTime, setEndTime] = useState<string>('10:00');
+
   
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
@@ -33,7 +34,7 @@ function MyForm({ setShowForm }: FormProps) {
       const startDateTime = new Date(startDate.toISOString().split('T')[0] + 'T' + startTime);
       const endDateTime = new Date(endDate.toISOString().split('T')[0] + 'T' + endTime);
       const newEvent = {start: startDateTime, end: endDateTime, title: formData.title, description: formData.description}
-      myEventsList.push(newEvent);
+      
       console.log(newEvent.description);
       setShowForm(false);
     }

@@ -3,12 +3,15 @@ import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import handleNavigates from '../services/apiServices';
 
 const theme = createTheme();
 
 export default function CTeam() {
+  const {handleNavigate} = handleNavigates();
   const [name, setName] = useState("");
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
@@ -16,7 +19,6 @@ export default function CTeam() {
 
   const sendReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const token = localStorage.getItem('token');
 
     const config = {
       headers: {
@@ -55,6 +57,11 @@ export default function CTeam() {
             alignItems: 'center',
           }}
         >
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
           <Typography component="h1" variant="h5">
             Enter the name of your team
           </Typography>

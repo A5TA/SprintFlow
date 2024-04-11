@@ -7,19 +7,20 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { useNavigate } from 'react-router-dom';
+import handleNavigates from '../services/apiServices';
 
-const JoinTeam = () => {
-  const [teamName, setTeamName] = useState('');
-  const navigate = useNavigate();
-  const [allTeams, setAllTeams] = useState<string[]>([]);
-  const [userTeams, setUserTeams] = useState<string[]>([]);
 
-  const token = localStorage.getItem('token');
-
+const joinTeam = () => {
+    const {handleNavigate} = handleNavigates();
+    const [teamName, setTeamName] = useState("");
+    const navigate = useNavigate();
+    const [allTeams, setAllTeams] = useState<string[]>([]);
+    const [userTeams, setUserTeams] = useState<string[]>([]);
+    const token = localStorage.getItem("token");
+  
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTeamName(event.target.value);
   };
-
   const fetchAllTeams = async () => {
     try {
       const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeams', {
@@ -32,7 +33,6 @@ const JoinTeam = () => {
       console.error('Error fetching teams:', error);
     }
   };
-
   const fetchUserTeams = async () => {
     try {
       const response = await Axios.get('http://localhost:8080/api/v1/team-controller/getAllTeamsForUser', {
@@ -85,11 +85,21 @@ const JoinTeam = () => {
   };
 
   return (
+
     <Box sx={{ textAlign: 'center', mt: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ fontFamily: 'Roboto', mb: 2 }}>
         Join a Team
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div>
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
+        <h2>
+            Join a team:
+        </h2>
         <form onSubmit={handleSubmit}>
           <Select value={teamName} onChange={(event) => setTeamName(event.target.value)} displayEmpty>
             <MenuItem value="" disabled>
