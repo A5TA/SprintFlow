@@ -7,8 +7,6 @@ import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Container from '@mui/material/Container';
-import DatePicker from "@mui/lab/DatePicker";
-import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import FormGroup from '@mui/material/FormGroup';
@@ -21,6 +19,8 @@ import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import CTasks from '../components/createTaskInProjects';
+import DatePicker from "react-datepicker";
+
 
 const theme = createTheme();
 
@@ -147,10 +147,6 @@ export default function Projects() {
     console.log(mapProjects);      //setMapProjects(mapProjects);
   }
 
-  // Function to get the project ID by project name
-  function getFromMap(projectName: string) {
-    return mapProjects.get(projectName);
-  } 
 
   // Function to get project names from map
   function getProjectNames(): string[] {
@@ -158,27 +154,14 @@ export default function Projects() {
   }
 
   // Event handlers for form inputs
-
-  const handleTeamChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedTeam(event.target.value as string);
-  };
-
-  const handleProjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedTaskProject(event.target.value as string);
-    fetchTasks(event.target.value as string);
-
-  // Event handlers for form inputs
-
   const handleTeamChange = (event: any) => {
     setSelectedTeam(event.target.value);
     setTeamChanged(true);
   };
 
-
   const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTaskProject(event.target.value);
     fetchTasks(event.target.value);
-
   };
 
   // Function to handle task editing
@@ -258,9 +241,9 @@ export default function Projects() {
   };
 
 
-  const handleProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setProjectName(event.target.value);
-  };
+  // const handleProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setProjectName(event.target.value);
+  // };
 
   // const handleProjectName = (event: any) => {
   //   setProjectName(event.target.value);
@@ -306,8 +289,7 @@ export default function Projects() {
     }
   };
 
-  const assignTaskReq = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const assignTaskReq = async (event: any) => {
     const bodyParameters = {
       "assignEmail": assignEmail,
       "taskId": editingTaskId,
@@ -330,7 +312,6 @@ export default function Projects() {
         setTaskCreated(true);  
         setAssignEmail("")
         setEmailSearchQuery(null); 
-
       }
     })
     .catch((error) => {
@@ -418,9 +399,6 @@ export default function Projects() {
     }
   };
 
-  // Function to save edited task details
-  
-
   // Function to cancel task editing
   const cancelEditing = () => {
     setEditingTaskId(null);
@@ -462,6 +440,7 @@ export default function Projects() {
         console.log("Task created successfully!");
         setTaskCreated(true);
         resetExpandedProjects();
+        handleClose();
       }
     })
     .catch((error) => {
@@ -479,109 +458,6 @@ export default function Projects() {
     setOpen(false);
   };
 
-  // JSX rendering
-return (
-  <ThemeProvider theme={theme}>
-    <Container maxWidth="md">
-      <Box sx={{ textAlign: 'center', mt: 8 }}>
-        <Typography variant="h5" gutterBottom>
-          Current Teams
-        </Typography>
-        {data.map((team: string, index: number) => (
-          <li key={index} value={team}>{team}</li>
-        ))}
-        <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
-          Create Team
-        </Button>
-        <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
-          Join Team
-        </Button>
-      </Box>
-      <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Current Projects
-        </Typography>
-        {mapProjects.size > 0 ? (
-          <div>
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {Array.from(mapProjects).map(([projectName, projectId], index) => (
-                <li key={index} style={{ marginBottom: '5px' }}>
-                  <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
-                    {expandedProjects[projectId] ? '-' : '>'}
-                  </button>
-                  <span>{projectName}</span>
-                  {expandedProjects[projectId] && projectTasks[projectName] && (
-                    <ul>
-                      {/* Render tasks for the selected project */}
-                      {projectTasks[projectName].map((task: Task) => (
-                        <li key={task.id}>
-                          {task.name}
-                          <span onClick={() => handleEditTask(task)}>🖉</span>
-                          {/* Additional content for editing task */}
-                          {task.id === editingTaskId && (
-                            <div>
-                              <label>
-                                Name:
-                                <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
-                              </label>
-                              <br />
-                              <label>
-                                Description:
-                                <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
-                              </label>
-                              <br />
-                              <label>
-                                Start Date:
-                                <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
-                              </label>
-                              <br />
-                              <label>
-                                End Date:
-                                <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
-                              </label>
-                              <br />
-                              <label>
-                                Points:
-                                <input
-                                  value={editedTaskPoints?.toString()}
-                                  onChange={(e) => {
-                                    const inputValue = e.target.value;
-                                    const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
-                                    setEditedTaskPoints(parsedValue);
-                                  }}
-                                />
-                              </label>
-                              <br />
-                              <label>
-                                Status:
-                                <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
-                              </label>
-                              <br />
-                              <label>
-                                Assign Task:
-                                <input type="text" value={assignEmail} onChange={(e) => setAssignEmail(e.target.value)} />
-                              </label>
-                              <button onClick={() => {
-                                assignTaskReq(task);
-                                cancelEditing();
-                                toggleProject({ id: projectId, name: projectName });
-                              }}>Assign</button>
-                              <br />
-                              <button onClick={() => {
-                                saveEditedTask(task);
-                                cancelEditing();
-                                toggleProject({ id: projectId, name: projectName });
-                              }}>Save</button>
-                              <button onClick={() => cancelEditing()}>Cancel</button>
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
   //Get all users on team selected and logic to make the dropdown work
   const fetchAllUsersOnTeam = async () => {
     try {
@@ -614,24 +490,9 @@ return (
   document.addEventListener('mousedown', handleClickOutside); //This is to understand what the user is clicking
 
   // JSX rendering
-  return (
+return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="md">
-        <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <Typography variant="h5" gutterBottom>
-            Current Teams
-          </Typography>
-          {data.map((team: string, index: number) => (
-              <li key={index} value={team}>{team}</li>
-            ))}
-          <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
-            Create Team
-          </Button>
-          <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
-            Join Team
-          </Button>
-
-      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <div style={{position: 'absolute', top: 20, right: 20 }}>
         <button onClick={handleLogout}>
           Logout
         </button>
@@ -646,12 +507,38 @@ return (
           Home
         </button>
       </div>
-          <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
-            <MenuItem value="" disabled>Select Team</MenuItem>
-            {data.map((team: string, index: number) => (
-              <MenuItem key={index} value={team}>{team}</MenuItem>
+      <Container maxWidth="md">
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Teams
+          </Typography>
+          {data.map((team: string, index: number) => (
+              <li key={index} value={team}>{team}</li>
             ))}
-          </Select>
+          <div>
+             <Box sx={{
+            display: "flex",
+            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center", 
+            gap: "0.5rem",
+            padding: "1rem" 
+          }}>
+              <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
+                Create Team
+              </Button>
+              <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
+                Join Team
+              </Button>
+            </Box>
+            <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
+              <MenuItem value="" disabled>Select Team</MenuItem>
+              {data.map((team: string, index: number) => (
+                <MenuItem key={index} value={team}>{team}</MenuItem>
+              ))}
+            </Select>
+          </div>
+       
         </Box>
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <Typography variant="h5" gutterBottom>
@@ -660,14 +547,14 @@ return (
           {mapProjects.size > 0 ? (
             <div>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
-  {Array.from(mapProjects).map(([projectName, projectId]) => (
-    <li key={projectId} style={{ marginBottom: '5px' }}>
-      <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
-        {expandedProjects[projectId] ? '-' : '>'}
-      </button>
-      <span>{projectName}</span>
-      {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
-        <ul>
+          {Array.from(mapProjects).map(([projectName, projectId]) => (
+            <li key={projectId} style={{ marginBottom: '5px' }}>
+              <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
+                {expandedProjects[projectId] ? '-' : '>'}
+              </button>
+              <span>{projectName}</span>
+              {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
+              <ul>
           {/* Render tasks for the selected project */}
           {projectTasks[projectName].map((task: Task) => (
             <li key={task.id}>
@@ -761,20 +648,17 @@ return (
               )}
             </li>
           ))}
-        </ul>
+            </ul>
       )}
-    </li>
-  ))}
-</ul>
+      </li>
+    ))}
+  </ul>
           </div>
         ) : (
           <Typography variant="body1">No projects available for the selected team</Typography>
         )}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mr: 2 }}>
-            Create Project
-          </Button>
-          <FormControl>
+          {/* This is useless because its in the form my guy */}
+          {/* <FormControl>
             <InputLabel id="project-label">Select Project</InputLabel>
             <Select
               labelId="project-label"
@@ -788,121 +672,79 @@ return (
                 <MenuItem key={index} value={projectName}>{projectName}</MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl> */}
+           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mr: 2 }}>
+              Create Project
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleOpen}>
+              Create Task
+            </Button>
+          </Box>
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleOpen}>
-      </Container>
-
-      <div style={{position: 'absolute', top: 200, right: 50 }}>
-        <h2> Create Task In Project</h2>
-        <label>Select Project:</label>
-        <select onChange={handleProjectChange}>
-          <option value="">Select Project</option>
-          {Array.from(mapProjects).map(([projectName, projectId]) => (
-            <option key={projectId} value={projectName}>{projectName}</option>
-          ))}
-        </select>
-        <form id="form" onSubmit={sendReq}>
-          <label>
-            Task Name:
-            <input onChange={handleTaskName} value={taskName} type='text'/>
-          </label>
-          <br/>
-          <label>
-            Description:
-            <input onChange={handleDescription} value={description} type='text'/>
-          </label>
-          <br/>
-          <label>
-            Start Date:
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          width: 400,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          borderRadius: '8px',
+          boxShadow: 24,
+          p: 4,
+        }}>
+          <Typography id="modal-modal-title" variant="h6" component="h2" color="black" sx={{ textAlign: 'center' }}>
+            Create Task
+          </Typography>
+          <form id="form" onSubmit={sendReq}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Select Project</InputLabel>
+                  <Select value={selectedTaskProject} onChange={handleProjectChange}>
+                    {Array.from(mapProjects).map(([projectName, projectId]) => (
+                      <MenuItem key={projectId} value={projectName}>{projectName}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth label="Task Name" value={taskName} onChange={handleTaskName} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth label="Description" value={description} onChange={handleDescription} />
+              </Grid>
+              <Grid item xs={12}>
+              Start Date:
             <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
             <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
-          </label>
-          <br/>
-          <label>
-            End Date:
-            <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
-            <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
-          </label>
-          <br/>
-          <label>
-            Points:
-            <input onChange={handlePoints} value={points} type='text'/>
-          </label>
-          <br/>
-          <button type='submit'>
-            Create Task
-          </Button>
-        </Box>
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={{
-            position: 'absolute',
-            width: 400,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
-            borderRadius: '8px',
-            boxShadow: 24,
-            p: 4,
-          }}>
-            <Typography id="modal-modal-title" variant="h6" component="h2" color="black" sx={{ textAlign: 'center' }}>
-              Create Task
-            </Typography>
-            <form id="form" onSubmit={sendReq}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Select Project</InputLabel>
-                    <Select value={selectedTaskProject} onChange={handleProjectChange}>
-                      {/* Your project options */}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Task Name" value={taskName} onChange={handleTaskName} />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Description" value={description} onChange={handleDescription} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <DatePicker
-                    fullWidth
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    renderInput={(params) => <TextField {...params} />}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <DatePicker
-                    fullWidth
-                    label="End Date"
-                    value={dueDate}
-                    onChange={(date) => setDueDate(date)}
-                    renderInput={(params) => <TextField {...params} />}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Points" value={points} onChange={handlePoints} type="number" />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button type="submit" variant="contained" color="primary">
-                    Create Task
-                  </Button>
-                </Grid>
+
+            </Grid>
+            <Grid item xs={12}>
+              End Date:
+              <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
+              <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
+
+            </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth label="Points" value={points} onChange={handlePoints} type="number" />
               </Grid>
-            </form>
-          </Box>
-        </Modal>
-      </Box>
+              <Grid item xs={12}>
+                <Button type="submit" variant="contained" color="primary">
+                  Create Task
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </Box>
+      </Modal>
     </Container>
   </ThemeProvider>
 );
