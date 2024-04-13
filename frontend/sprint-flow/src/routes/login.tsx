@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Axios from 'axios';
+import handleNavigates from '../services/apiServices';
 
 const theme = createTheme();
 
@@ -22,6 +23,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {message, setMessage} = handleNavigates();
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
@@ -46,7 +48,7 @@ export default function Login() {
           }
         })
         .catch((error) => {
-          console.error("There was an error!", error);
+          setMessage("Incorrect Email or Password. Please Try Again");
         });
       }
 
@@ -124,6 +126,7 @@ const handleEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
                 </Link>
               </Grid>
             </Grid>
+            <p style={{color: "red"}}>{message}</p>
           </Box>
         </Box>
       </Container>

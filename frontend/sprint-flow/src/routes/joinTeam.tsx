@@ -7,10 +7,12 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box'
 import { useNavigate } from 'react-router-dom';
+import handleNavigates from '../services/apiServices';
 
 const joinTeam = () => {
     const [teamName, setTeamName] = useState("");
     const navigate = useNavigate();
+    const {handleNavigate, message, setMessage} = handleNavigates();
     const [allTeams, setAllTeams] = useState<string[]>([]);
     const [userTeams, setUserTeams] = useState<string[]>([]);
 
@@ -78,7 +80,7 @@ const joinTeam = () => {
           }
         })
         .catch((error) => {
-          console.error("There was an error!", error);
+          setMessage("Error Joining Team. Please Try Again.");
         });
       }
 
@@ -89,6 +91,11 @@ const joinTeam = () => {
     }
     return (
     <Box sx={{ textAlign: 'center', mt: 4 }}>
+      <div style={{position: 'absolute', top: 20, right: 20 }}>
+        <button onClick={() => handleNavigate("/projects")}>
+          Projects
+        </button>
+      </div>
       <Typography variant="h4" gutterBottom sx={{ fontFamily: 'Roboto', mb: 2 }}>
         Join a Team
       </Typography>
@@ -107,6 +114,7 @@ const joinTeam = () => {
           <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
             Join Team
           </Button>
+          <p style={{color: "red"}}>{message}</p>
         </form>
       </Box>
     </Box>

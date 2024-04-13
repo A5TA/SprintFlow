@@ -14,13 +14,14 @@ import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Modal from '@mui/material/Modal';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { List, ListItem, ListItemText, Paper, Popper, TextField } from '@mui/material';
+import { List, ListItem, ListItemText, Paper, Popper, TextField, colors } from '@mui/material';
 import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
-
+import toastr from 'toastr';
 import CTasks from '../components/createTaskInProjects';
 import DatePicker from "react-datepicker";
+
 
 
 const theme = createTheme();
@@ -48,9 +49,10 @@ export interface Task {
 
 export default function Projects() {
 
-  const { handleLogout, handleNavigate } = handleNavigates();
+  const { handleLogout, handleNavigate, message, setMessage} = handleNavigates();
   const token = localStorage.getItem("token");
   const email = localStorage.getItem("email");
+  
 
   const [mapProjects, setMapProjects] = useState(new Map<string, string>());
 
@@ -63,6 +65,8 @@ export default function Projects() {
   const [data, setData] = useState<string[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [teamChanged, setTeamChanged] = useState(false);
+
+  const [team, setTeam] = useState(false);
   
   // State for managing project expansion and tasks
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -77,6 +81,7 @@ export default function Projects() {
   const [taskName, setTaskName] = useState("");
   const [points, setPoints] = useState("");
   const [taskCreated, setTaskCreated] = useState<boolean>(false);
+  const [currentTeam, setCurrentTeam] = useState("");
 
   // Task editing state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -87,6 +92,8 @@ export default function Projects() {
   const [editedTaskPoints, setEditedTaskPoints] = useState<number | null>(null);
   const [taskStatus, setTaskStatus] = useState("");
   const [assignEmail, setAssignEmail] = useState("");
+
+  const [teamOpen, setTeamOpen] = useState(false);
 
   const [startTime, setStartTime] = useState<string>('10:00');
   const [endTime, setEndTime] = useState<string>('10:00');
@@ -111,19 +118,13 @@ export default function Projects() {
   // Fetch teams and projects on component mount
   useEffect(() => {
     fetchTeams();
+    setMessage("");
   }, []);
 
-  useEffect(() => {
-    console.log(mapProjects);
-  }, [mapProjects]);
-
 
   useEffect(() => {
-    if (selectedTeam !== "") {
-      fetchProjects();
-      setTeamChanged(false);
-    }
-  }, [teamChanged]);
+      fetchProjectss(currentTeam);
+  }, [currentTeam]);
 
 
   useEffect(() => {
@@ -135,7 +136,6 @@ export default function Projects() {
       setStartDate(null);
       setDueDate(null);
       setPoints("");
-      //setSelectedTaskProject("");
     }
   }, [taskCreated]);
 
@@ -148,16 +148,10 @@ export default function Projects() {
     console.log(mapProjects);      //setMapProjects(mapProjects);
   }
 
-
-  // Function to get project names from map
-  function getProjectNames(): string[] {
-    return Array.from(mapProjects.keys());
-  }
-
   // Event handlers for form inputs
   const handleTeamChange = (event: any) => {
     setSelectedTeam(event.target.value);
-    setTeamChanged(true);
+    fetchProjectss(event.target.value);
   };
 
   const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -170,7 +164,6 @@ export default function Projects() {
     setEditingTaskId(task.id);
     setEditedTaskName(task.name);
     setEditedTaskDesc(task.description);
-    // Ensure that task.startDate is a Date object before assigning it to editedTaskStart
     setEditedTaskStart(task.startDate);
     setEditedTaskEnd(task.dueDate);
     const points = task.points !== null ? parseInt(task.points, 10) : 0;
@@ -333,32 +326,15 @@ export default function Projects() {
     });
   };
 
-  // Function to send task creation request
-
-  useEffect(() => {
-    // Fetch data for initial rendering
-    fetchTeams();
-  }, []);
-
-  useEffect(() => {
-    if (selectedTeam !== "") {
-      fetchProjects();
-    }
-  }, [selectedTeam]);
-  
-   // Function to fetch teams
-
-  const fetchProjects = async () => {
-    console.log("gettingp projects for ", selectedTeam)
-    try {
+const fetchProjectss =  async(teamName: string) => {
+      try {
         mapProjects.clear();
-        const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
+        const response = await Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${teamName}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
         const projects = response.data.data;
-        console.log(projects);
         //(projects);
         projects.forEach((project: Project) => {
             addToMap(project.name, project.id);
@@ -369,11 +345,49 @@ export default function Projects() {
             initialExpandedState[project.id] = false;
         });
         setExpandedProjects(initialExpandedState);
+        console.log("hello, you");
         fetchAllUsersOnTeam(); //we need to show all the users on the team
     } catch (error) {
         console.error('Error fetching projects:', error);
     }
   };
+
+  // Function to send task creation request
+
+  // useEffect(() => {
+  //   if (selectedTeam !== "") {
+  //     // fetchProjects();
+  //   }
+  // }, [selectedTeam]);
+  
+   // Function to fetch teams
+
+  // const fetchProjects =  async() => {
+  //   console.log("gettingp projects for ", selectedTeam)
+  //   try {
+  //       mapProjects.clear();
+  //       const response = await  Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
+  //           headers: {
+  //               Authorization: `Bearer ${token}`
+  //           }
+  //       });
+  //       const projects = response.data.data;
+  //       console.log(projects);
+  //       //(projects);
+  //       projects.forEach((project: Project) => {
+  //           addToMap(project.name, project.id);
+  //       });
+  //       // Update projectNamesArr after setting projects
+  //       const initialExpandedState: { [key: string]: boolean } = {};
+  //       projects.forEach((project: Project) => {
+  //           initialExpandedState[project.id] = false;
+  //       });
+  //       setExpandedProjects(initialExpandedState);
+  //       fetchAllUsersOnTeam(); //we need to show all the users on the team
+  //   } catch (error) {
+  //       console.error('Error fetching projects:', error);
+  //   }
+  // };
 
 
   // Fetch tasks for the selected project from API
@@ -409,6 +423,25 @@ export default function Projects() {
   const sendReq = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const token = localStorage.getItem('token');
+
+    var [startHours, startMins] = startTime.split(":");
+    var [endHours, endMins] = endTime.split(":");
+
+    const startTimeInt = (parseInt(startHours) * 60) + parseInt(startMins);
+    const endTimeInt = (parseInt(endHours) * 60) + parseInt(endMins);
+
+    const startTimeMs = startDate!?.getTime();
+    const dueTimeMs = dueDate!?.getTime();
+    const difInMs = dueTimeMs - startTimeMs;
+    const difInDays = difInMs / (1000 * 3600 * 24);
+
+
+
+    if (endTimeInt - startTimeInt <= 60 && difInDays < 1){
+      setMessage("Task needs to be longer than 1 hour");
+      return;
+    }
+
     const javaStartDate = startDate ? new Date(startDate.toISOString().split('T')[0] + 'T' + startTime) : null;
     const javaDueDate = dueDate ? new Date(dueDate.toISOString().split('T')[0] + 'T' + endTime) : null;
 
@@ -457,17 +490,18 @@ export default function Projects() {
   // Function to handle closing the modal
   const handleClose = () => {
     setOpen(false);
+    setMessage("");
   };
 
   //Get all users on team selected and logic to make the dropdown work
   const fetchAllUsersOnTeam = async () => {
     try {
-        const response = await Axios.get(`http://localhost:8080/api/v1/team-controller/getAllUsersForTeam/${selectedTeam}`, {
+        const response = await Axios.get(`http://localhost:8080/api/v1/team-controller/getAllUsersForTeam/${currentTeam}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        // console.log("Users are:", response)
+        console.log("Users are:", response)
         setEmailList(response.data.data)
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -514,47 +548,29 @@ return (
             Current Teams
           </Typography>
           {data.map((team: string, index: number) => (
-              <li key={index} value={team}>{team}</li>
-            ))}
-          <div>
-             <Box sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexDirection: "column",
-            alignItems: "center", 
-            gap: "0.5rem",
-            padding: "1rem" 
-          }}>
-              <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
-                Create Team
-              </Button>
-              <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
-                Join Team
-              </Button>
-            </Box>
-            <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
-              <MenuItem value="" disabled>Select Team</MenuItem>
-              {data.map((team: string, index: number) => (
-                <MenuItem key={index} value={team}>{team}</MenuItem>
-              ))}
-            </Select>
-          </div>
-       
-        </Box>
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Current Projects
-          </Typography>
-          {mapProjects.size > 0 ? (
             <div>
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {Array.from(mapProjects).map(([projectName, projectId]) => (
-            <li key={projectId} style={{ marginBottom: '5px' }}>
-              <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
-                {expandedProjects[projectId] ? '-' : '>'}
-              </button>
-              <span>{projectName}</span>
-              {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
+              <li key={index} value={team}>
+              <button onClick={() => {
+                setCurrentTeam(team);
+                if (currentTeam !== team){
+                  setTeamOpen(true);
+                }
+                else{
+                  setTeamOpen(prevState => !prevState);
+                }
+                
+              }}>{teamOpen && team===currentTeam ? "-" : ">"}</button>
+                {team}
+                </li>
+                {team === currentTeam && teamOpen &&(
+                  <ul>
+                    {Array.from(mapProjects).map(([projectName, projectId]) => (
+                      <li key={projectId}>
+                        <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
+                          {expandedProjects[projectId] ? '-' : '>'}
+                        </button>
+                          <span>{projectName}</span>
+                          {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
               <ul>
           {/* Render tasks for the selected project */}
           {projectTasks[projectName].map((task: Task) => (
@@ -651,29 +667,36 @@ return (
           ))}
             </ul>
       )}
-      </li>
-    ))}
-  </ul>
+                      </li>
+                    ))}
+                  </ul> )}
+              </div>
+            )
+          )}
+        
+          <div>
+             <Box sx={{
+            display: "flex",
+            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center", 
+            gap: "0.5rem",
+            padding: "1rem" 
+          }}>
+              <Button component={Link} to="/projects/createTeam" variant="contained" color="primary">
+                Create Team
+              </Button>
+              <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
+                Join Team
+              </Button>
+            </Box>
           </div>
-        ) : (
-          <Typography variant="body1">No projects available for the selected team</Typography>
-        )}
-          {/* This is useless because its in the form my guy */}
-          {/* <FormControl>
-            <InputLabel id="project-label">Select Project</InputLabel>
-            <Select
-              labelId="project-label"
-              id="project-select"
-              value={selectedTaskProject}
-              onChange={handleProjectChange}
-              displayEmpty
-            >
-              <MenuItem value="" disabled>Select Project</MenuItem>
-              {getProjectNames().map((projectName: string, index: number) => (
-                <MenuItem key={index} value={projectName}>{projectName}</MenuItem>
-              ))}
-            </Select>
-          </FormControl> */}
+       
+        </Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Current Projects
+          </Typography>
            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mr: 2 }}>
               Create Project
@@ -707,6 +730,14 @@ return (
           <form id="form" onSubmit={sendReq}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
+              <FormControl fullWidth>
+                  <InputLabel> Select Team</InputLabel>
+                  <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
+                  {data.map((team: string, index: number) => (
+                    <MenuItem key={index} value={team}>{team}</MenuItem>
+                  ))}
+            </Select>
+                </FormControl>
                 <FormControl fullWidth>
                   <InputLabel>Select Project</InputLabel>
                   <Select value={selectedTaskProject} onChange={handleProjectChange}>
@@ -740,6 +771,7 @@ return (
                 <Button type="submit" variant="contained" color="primary">
                   Create Task
                 </Button>
+                  <p style={{color: "red"}}>{message}</p>
               </Grid>
             </Grid>
           </form>

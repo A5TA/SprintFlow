@@ -7,6 +7,7 @@ import 'react-select-search/style.css'
 import { Project } from "./projects";
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
+import handleNavigates from "../services/apiServices";
 
 export default function CTasks({UpdateCalendar}) {
     const [description, setDescription] = useState("");
@@ -22,10 +23,9 @@ export default function CTasks({UpdateCalendar}) {
     const token = localStorage.getItem('token');
     const [startTime, setStartTime] = useState<string>('10:00');
     const [endTime, setEndTime] = useState<string>('10:00');
+    const {message, setMessage} = handleNavigates();
 
     
-    // Access mapProjects from context
-
     const handleDescription = (event: any) => {
         setDescription(event.target.value);
     }
@@ -35,20 +35,6 @@ export default function CTasks({UpdateCalendar}) {
     const handlePoints = (event: any) => {
         setPoints(event.target.value);
     }
-
-    // const changeStartTime= (timeValue: string) => {
-    //   if (timeValue !== null)
-    //   {
-    //     setStartTime(timeValue);
-    //   }
-    // };
-
-    // const changeEndTime= (timeValue: string) => {
-    //   if (timeValue !== null)
-    //   {
-    //     setStartTime(timeValue);
-    //   }
-    // };
 
     useEffect(() => {
       fetchTeams();
@@ -131,9 +117,7 @@ export default function CTasks({UpdateCalendar}) {
             }
         })
         .catch((error) => {
-          console.error("There was an error!", error);
-          console.log(selectedProject);
-          console.log(selectedTeam);
+          setMessage("Error Creating Task. Please Try Again.");
         });
       }
 
@@ -187,6 +171,7 @@ export default function CTasks({UpdateCalendar}) {
         <button type='submit'>
           Create Task
         </button>
+        <p style={{color: "red"}}>{message}</p>
         </form>  
     </div>
     );

@@ -8,7 +8,7 @@ import handleNavigates from '../services/apiServices';
 const theme = createTheme();
 
 export default function CTeam() {
-  const {handleNavigate} = handleNavigates();
+  const {handleNavigate, message, setMessage} = handleNavigates();
   const [name, setName] = useState("");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -42,7 +42,7 @@ export default function CTeam() {
         }
       })
       .catch((error) => {
-        console.error("There was an error!", error);
+        setMessage("Error Creating Team. Please Try Again")
       });
   }
 
@@ -86,6 +86,7 @@ export default function CTeam() {
             >
               Create Team
             </Button>
+            <p style={{color: "red"}}>{message}</p>
           </Box>
         </Box>
       </Container>
