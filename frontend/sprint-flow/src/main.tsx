@@ -15,6 +15,7 @@ import Welcome from "./routes/welcome";
 import CreateProject from "./routes/createProject";
 import Password from "./routes/forgotPassword";
 import JoinTeam from "./routes/joinTeam";
+import NavBar from "./components/NavBar";
 
 
 const router = createBrowserRouter([
@@ -24,7 +25,10 @@ const router = createBrowserRouter([
   },
   {
     path: "/calendar",
-    element: <Calendar/>,
+    element: <>
+    <NavBar />
+    <Calendar />
+    </>,
   },
   {
     path: "/createTeam",
@@ -44,7 +48,10 @@ const router = createBrowserRouter([
   },
   {
     path: "/projects",
-    element: <Projects />,
+    element: <>
+            <NavBar />
+            <Projects />
+            </>,
   },
   {
     path: "/createTask",
@@ -52,7 +59,10 @@ const router = createBrowserRouter([
   },
   {
     path: "/main",
-    element: <Welcome />,
+    element: <>
+    <NavBar />
+    <Welcome />
+    </>,
   },
   {
     path: "/projects/createTeam",

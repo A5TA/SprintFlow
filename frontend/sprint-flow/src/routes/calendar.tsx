@@ -10,7 +10,7 @@ import CustomAgenda from '../components/customAgendaView';
 
 
 function App() {
-  const {handleLogout, handleNavigate} = handleNavigates();
+  // const {handleLogout, handleNavigate} = handleNavigates();
   const localizer = momentLocalizer(moment);
   const token = localStorage.getItem("token");
   // const [showForm, setShowForm] = useState(false);
@@ -55,21 +55,6 @@ function App() {
 
   return (
     <div className="App">
-      <div style={{position: 'absolute', top: 20, right: 20 }}>
-        <button onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-      <div style={{position: 'absolute', top: 20, right: 90 }}>
-        <button onClick={() => handleNavigate("/projects")}>
-          Projects
-        </button>
-      </div>
-      <div style={{position: 'absolute', top: 20, right: 175 }}>
-        <button onClick={() => handleNavigate("/main")}>
-          Home
-        </button>
-      </div>
       {/* <CreateEventButton forMethod={setShowForm} />
       {showForm && <MyForm setShowForm={setShowForm} />}
       {showForm && <button type="button" onClick={() => setShowForm(false)}>X</button>} */}
