@@ -12,7 +12,7 @@ import handleNavigates from '../services/apiServices';
 const theme = createTheme();
 
 const CreateProject = () => {
-  const {handleNavigate} = handleNavigates();
+  const {handleNavigate, message, setMessage} = handleNavigates();
   const [teamName, setTeamName] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -35,7 +35,6 @@ const CreateProject = () => {
       });
       setData(response.data.data);
     } catch (error) {
-      console.error('Error fetching teams:', error);
     }
   };
 
@@ -74,7 +73,7 @@ const CreateProject = () => {
         }
       })
       .catch((error) => {
-        console.error('There was an error!', error);
+        setMessage("Error Creating Project. Please Try Again.");
       });
   };
 
@@ -147,6 +146,7 @@ const CreateProject = () => {
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Create Project
             </Button>
+            <p style={{color: "red"}}>{message}</p>
           </Box>
         </Box>
       </Container>

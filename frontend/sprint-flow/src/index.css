@@ -32,6 +32,34 @@
   border: none !important;
 }
 
+.rbc-header {
+  width: 300px !important;
+}
+
+.rbc-agenda-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.rbc-agenda-table td {
+  border: 1px solid black; /* Adjust border properties as needed */
+  padding: 7px; /* Optional: Add padding for better appearance */
+}
+
+.rbc-header:last-child {
+  width: 600px !important;
+}
+
+.rbc-event-title {
+  width: 300px;
+}
+.rbc-event-date {
+  width: 400px;
+}
+.rbc-event-title:last-child {
+  width: 600px;
+}
+
 .rbc-event-label {
   display: none !important;
 }
@@ -47,3 +75,5 @@
   border-top: 1px solid #fbb3ec;
   display: block;
 }
+
+
