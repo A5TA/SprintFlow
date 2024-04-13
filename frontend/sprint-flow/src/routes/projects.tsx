@@ -527,21 +527,6 @@ const fetchProjectss =  async(teamName: string) => {
   // JSX rendering
 return (
     <ThemeProvider theme={theme}>
-        <div style={{position: 'absolute', top: 20, right: 20 }}>
-        <button onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-      <div style={{position: 'absolute', top: 20, right: 90 }}>
-        <button onClick={() => handleNavigate("/calendar")}>
-          Calendar
-        </button>
-      </div>
-      <div style={{position: 'absolute', top: 20, right: 175 }}>
-        <button onClick={() => handleNavigate("/main")}>
-          Home
-        </button>
-      </div>
       <Container maxWidth="md">
         <Box sx={{ textAlign: 'center', mt: 8 }}>
           <Typography variant="h5" gutterBottom>

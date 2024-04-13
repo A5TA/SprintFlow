@@ -6,12 +6,10 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link } from "react-router-dom";  
-import  handleNavigates  from '../services/apiServices';
 
 const theme = createTheme();
 
 export default function Welcome() {
-    const {handleLogout} = handleNavigates();
     return (
         <ThemeProvider theme={theme}>
             <Container maxWidth="md">
@@ -32,11 +30,6 @@ export default function Welcome() {
                         </Grid>
                     </Grid>
                 </Box>
-              <div style={{position: 'absolute', top: 20, right: 20 }}>
-                  <button onClick={handleLogout}>
-                      Logout
-                  </button>
-              </div>
             </Container>
         </ThemeProvider>
     );
