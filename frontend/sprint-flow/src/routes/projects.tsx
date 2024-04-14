@@ -657,10 +657,6 @@ return (
             </Button>
           </Box>
         </Box>
-        <div style={{paddingBottom: "70px"}}>
-        <button onClick={handleOpen}>
-          Create Task
-        </button>
       <Modal
         open={open}
         onClose={handleClose}
@@ -682,7 +678,6 @@ return (
           <CTasks UpdateCalendar = {handleTaskCreation} UpdateModal={handleClose}/>
         </Box>
       </Modal>
-      </div>
     </Container>
   </ThemeProvider>
 );

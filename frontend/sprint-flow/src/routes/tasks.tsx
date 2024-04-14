@@ -155,7 +155,7 @@ export default function CTasks({UpdateCalendar, UpdateModal}) {
           <form id="form" onSubmit={sendReq}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth sx={{marginBottom: "15px"}}>
                   <InputLabel> Select Team</InputLabel>
                   <Select value={selectedTeam} onChange={handleTeamChange}>
                   {teams.map((team: string, index: number) => (
