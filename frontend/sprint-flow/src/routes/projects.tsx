@@ -14,14 +14,15 @@ import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import Modal from '@mui/material/Modal';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { List, ListItem, ListItemText, Paper, Popper, TextField, colors } from '@mui/material';
+import { Collapse, List, ListItem, ListItemButton, ListItemText, Paper, Popper, TextField, colors } from '@mui/material';
 import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import DatePicker from "react-datepicker";
 import CTasks from './tasks';
-
-
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditIcon from '@mui/icons-material/Edit';
 
 const theme = createTheme();
 
@@ -498,141 +499,17 @@ return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Box sx={{ textAlign: 'center', mt: 8 }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h4" gutterBottom>
             Sprint Flow Outline
           </Typography>
-          {data.map((team: string, index: number) => (
-            <div>
-              <li key={index} value={team}>
-              <button onClick={() => {
-                setCurrentTeam(team);
-                if (currentTeam !== team){
-                  setTeamOpen(true);
-                }
-                else{
-                  setTeamOpen(prevState => !prevState);
-                }
-                
-              }}>{teamOpen && team===currentTeam ? "-" : ">"}</button>
-                {team}
-                </li>
-                {team === currentTeam && teamOpen &&(
-                  <ul>
-                    {Array.from(mapProjects).map(([projectName, projectId]) => (
-                      <li key={projectId}>
-                        <button onClick={() => toggleProject({ id: projectId, name: projectName })}>
-                          {expandedProjects[projectId] ? '-' : '>'}
-                        </button>
-                          <span>{projectName}</span>
-                          {expandedProjects[projectId] && projectTasks[projectName] && ( // Check if tasks exist for the selected project
-              <ul>
-          {/* Render tasks for the selected project */}
-          {projectTasks[projectName].map((task: Task) => (
-            <li key={task.id}>
-              {task.name}
-              <span onClick={() => handleEditTask(task)}>🖉</span>
-              {/* Additional content for editing task */}
-              {task.id === editingTaskId && (
-                <div>
-                  <label>
-                    Name:
-                    <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
-                  </label>
-                  <br />
-                  <label>
-                    Description:
-                    <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
-                  </label>
-                  <br />
-                  <label>
-                    Start Date:
-                    <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
-                  </label>
-                  <br />
-                  <label>
-                    End Date:
-                    <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
-                  </label>
-                  <br />
-                  <label>
-                    Points:
-                    <input
-                      value={editedTaskPoints?.toString()}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
-                        setEditedTaskPoints(parsedValue);
-                      }}
-                    />
-                  </label>
-                  <br />
-                  <label>
-                    Status:
-                    <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
-                  </label>
-                  <br />
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <div>
-                      <TextField
-                        label="Search Assignee"
-                        type="text"
-                        value={emailSearchQuery || ''}
-                        onChange={handleSearchChange}
-                        onClick={() => setShowDropdownForEmail(true)}
-                        margin="normal"
-                        inputRef={inputRef}
-                      />
-                      <Popper open={showDropdownForEmail} anchorEl={inputRef.current} placement="bottom-start">
-                        <Paper>
-                        <List ref={listRef}>
-                          {filteredEmails.map((email, index) => (
-                            <ListItem key={index} onClick={(e) => {
-                              setAssignEmail(email.email)
-                              handleSearchChange({ target: { value: `${email.firstName} ${email.lastName}` } });                            
-                              }}>
-                              <ListItemText primary={`${email.firstName} ${email.lastName}`} secondary={email.email} />
-                            </ListItem>
-                          ))}
-                        </List>
-                        </Paper>
-                      </Popper>
-                      
-                    </div>
-                    <button style={{ height: '30px', marginLeft: '10px', padding: '5px 10px', }}
-                     onClick={() => {
-                    assignTaskReq(task);
-                    cancelEditing();
-                    toggleProject({ id: projectId, name: projectName });
-                  }}>Assign</button>
-                  </div>
-                  <button onClick={() => {
-                    saveEditedTask(task);
-                    cancelEditing();
-                    toggleProject({ id: projectId, name: projectName });
-                  }}>Save</button>
-                  <button onClick={() => {
-                    cancelEditing()
-                    setAssignEmail("")
-                    setEmailSearchQuery(null);    
-                  }}>Cancel</button>
-                </div>
-              )}
-            </li>
-          ))}
-            </ul>
-      )}
-                      </li>
-                    ))}
-                  </ul> )}
-              </div>
-            )
-          )}
-        
+          <Typography variant="h6">
+            Here you can create teams, join teams, create projects, and create tasks for those projects
+          </Typography>
           <div>
              <Box sx={{
             display: "flex",
             justifyContent: "center",
-            flexDirection: "column",
+            flexDirection: "row",
             alignItems: "center", 
             gap: "0.5rem",
             padding: "1rem" 
@@ -643,19 +520,163 @@ return (
               <Button component={Link} to="/projects/joinTeam" variant="contained" color="primary">
                 Join Team
               </Button>
-            </Box>
-          </div>
-       
-        </Box>
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mr: 2 }}>
+               <Button component={Link} to="/projects/createProject" variant="contained" color="primary">
               Create Project
             </Button>
             <Button variant="contained" color="primary" onClick={handleOpen}>
               Create Task
             </Button>
-          </Box>
+            </Box>
+          </div>
+          <Typography variant="h6" gutterBottom>
+            Your Teams
+          </Typography>
+          {data.length === 0 && 
+           <Typography variant="h6" gutterBottom>
+           You are not in any Teams go join or make one!
+         </Typography>}
+          <List component="nav" aria-labelledby="nested-list-subheader">
+            {data.map((team: string, index: number) => (
+              <div key={index}>
+                  <ListItemButton onClick={() => {
+                  setCurrentTeam(team);
+                  if (currentTeam !== team){
+                    setTeamOpen(true);
+                  }
+                  else{
+                    setTeamOpen(prevState => !prevState);
+                  }
+                }}>
+                  <ListItemText primary={team} />
+                  {currentTeam === team && teamOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </ListItemButton>
+                <Collapse in={currentTeam === team && teamOpen} timeout="auto" unmountOnExit>
+                <Typography variant="h6" style={{ fontWeight: '500', marginBottom: '10px' }}>
+                  Projects for {team}
+                </Typography>
+                <List component="div" sx={{backgroundColor: "#F9F9F9", borderRadius: "10px" }}>
+                    {Array.from(mapProjects).map(([projectName, projectId]) => (
+                      <div key={projectId}>
+                      <ListItemButton key={projectId} onClick={() => toggleProject({ id: projectId, name: projectName })}>
+                        <ListItemText primary={projectName} sx={{ pl: 4 }}/>
+                        {expandedProjects[projectId] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </ListItemButton>
+                      <Collapse in={expandedProjects[projectId]} timeout="auto" unmountOnExit>
+                      <List component="div">
+                        {projectTasks[projectName] && (
+                          <ul>
+                              <Typography style={{ fontWeight: '500', marginBottom: '10px',  }}>
+                                Your Tasks for {projectName}
+                              </Typography>
+                            {projectTasks[projectName].map((task: Task) => (
+                              <li key={task.id} style={{ listStyleType: "none" }}>
+                                <div style={{display: "flex", justifyContent: "center", padding: "5px"}}>
+                                  <Typography>{task.name}</Typography>
+                                  <EditIcon onClick={() => handleEditTask(task)}/>
+                                </div>
+                              
+                                {task.id === editingTaskId && (
+                                  <div style={{display: "flex", flexDirection: "column", alignItems: "center", gap: "0px"}}>
+                                    <label>
+                                      Name:
+                                      <input value={editedTaskName} onChange={(e) => setEditedTaskName(e.target.value)} />
+                                    </label>
+                                    <br />
+                                    <label>
+                                      Description:
+                                      <input value={editedTaskDesc} onChange={(e) => setEditedTaskDesc(e.target.value)} />
+                                    </label>
+                                    <br />
+                                    <label>
+                                      Start Date:
+                                      <DatePicker selected={editedTaskStart} onChange={(date: Date | null) => setEditedTaskStart(date)} />
+                                    </label>
+                                    <br />
+                                    <label>
+                                      End Date:
+                                      <DatePicker selected={editedTaskEnd} onChange={(date: Date | null) => setEditedTaskEnd(date)} />
+                                    </label>
+                                    <br />
+                                    <label>
+                                      Points:
+                                      <input
+                                        value={editedTaskPoints?.toString()}
+                                        onChange={(e) => {
+                                          const inputValue = e.target.value;
+                                          const parsedValue = inputValue.trim() !== '' && !isNaN(parseInt(inputValue, 10)) ? parseInt(inputValue, 10) : null;
+                                          setEditedTaskPoints(parsedValue);
+                                        }}
+                                      />
+                                    </label>
+                                    <br />
+                                    <label>
+                                      Status:
+                                      <input value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)} />
+                                    </label>
+                                    <br />
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                      <div>
+                                        <TextField
+                                          label="Search Assignee"
+                                          type="text"
+                                          value={emailSearchQuery || ''}
+                                          onChange={handleSearchChange}
+                                          onClick={() => setShowDropdownForEmail(true)}
+                                          margin="normal"
+                                          inputRef={inputRef}
+                                        />
+                                        <Popper open={showDropdownForEmail} anchorEl={inputRef.current} placement="bottom-start">
+                                          <Paper>
+                                            <List ref={listRef}>
+                                              {filteredEmails.map((email, index) => (
+                                                <ListItem key={index} onClick={(e) => {
+                                                  setAssignEmail(email.email)
+                                                  handleSearchChange({ target: { value: `${email.firstName} ${email.lastName}` } });
+                                                }}>
+                                                  <ListItemText primary={`${email.firstName} ${email.lastName}`} secondary={email.email} />
+                                                </ListItem>
+                                              ))}
+                                            </List>
+                                          </Paper>
+                                        </Popper>
+                                      </div>
+                                      <Button variant="outlined" style={{ height: '30px', marginLeft: '10px', padding: '5px 10px' }}
+                                        onClick={() => {
+                                          assignTaskReq(task);
+                                          cancelEditing();
+                                          toggleProject({ id: projectId, name: projectName });
+                                        }}>Assign</Button>
+                                    </div>
+                                    <div style={{display: "flex", flexDirection: "row", gap: "5px"}}>
+                                    <Button variant="outlined" onClick={() => {
+                                      saveEditedTask(task);
+                                      cancelEditing();
+                                      toggleProject({ id: projectId, name: projectName });
+                                    }}>Save</Button>
+                                    <Button variant="outlined" onClick={() => {
+                                      cancelEditing()
+                                      setAssignEmail("")
+                                      setEmailSearchQuery(null);
+                                    }}>Cancel</Button>
+                                    </div>
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </List>
+                    </Collapse>
+                      
+                    </div>
+                    ))}
+                    
+                  </List>
+                  </Collapse>
+              </div>
+              )
+            )}
+            </List>
         </Box>
       <Modal
         open={open}
