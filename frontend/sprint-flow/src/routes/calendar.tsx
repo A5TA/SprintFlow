@@ -7,6 +7,8 @@ import CTasks from './tasks';
 import "../index.css";
 import handleNavigates from '../services/apiServices';
 import CustomAgenda from '../components/customAgendaView';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
 
 
 function App() {
@@ -17,10 +19,18 @@ function App() {
   const [tasks, setTasks] = useState<any[]>([]); // Specify type for tasks
 
   const [update, setUpdate] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleTaskCreation = () => {
   setUpdate(true);
 }
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
   const fetchTasks = async () => {
     try {
@@ -34,8 +44,8 @@ function App() {
         ...task,
         title: task.name,
         description: task.description,
-        start: task.startDate,
-        end: task.dueDate,
+        start: new Date(task.startDate),
+        end: new Date (task.dueDate),
       }));
       setTasks(updatedTasks);
       console.log(data);
@@ -73,8 +83,31 @@ function App() {
       {/* <CreateEventButton forMethod={setShowForm} />
       {showForm && <MyForm setShowForm={setShowForm} />}
       {showForm && <button type="button" onClick={() => setShowForm(false)}>X</button>} */}
-      <div style={{padding: "70px"}}>
-      <CTasks UpdateCalendar = {handleTaskCreation}/>
+      <div style={{paddingBottom: "70px"}}>
+        <button onClick={handleOpen}>
+          Create Task
+        </button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          width: 400,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          borderRadius: '8px',
+          boxShadow: 24,
+          p: 4,
+        }}>
+          <CTasks UpdateCalendar = {handleTaskCreation} UpdateModal={handleClose}/>
+        </Box>
+      </Modal>
       </div>
       <Calendar
         localizer={localizer}
