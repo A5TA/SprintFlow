@@ -18,9 +18,8 @@ import { List, ListItem, ListItemText, Paper, Popper, TextField, colors } from '
 import handleNavigates from "../services/apiServices"
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
-import toastr from 'toastr';
-import CTasks from '../components/createTaskInProjects';
 import DatePicker from "react-datepicker";
+import CTasks from './tasks';
 
 
 
@@ -55,6 +54,7 @@ export default function Projects() {
   
 
   const [mapProjects, setMapProjects] = useState(new Map<string, string>());
+  const [update, setUpdate] = useState(false);
 
   // State for team and project selection
   const [selectedTeam, setSelectedTeam] = useState<string>("");
@@ -106,6 +106,10 @@ export default function Projects() {
     setEmailSearchQuery(e.target.value);
   };
 
+  const handleTaskCreation = () => {
+    setUpdate(true);
+  }
+
   const filteredEmails = emailList.filter((email) => {
     if (emailSearchQuery === null) {
       return true; //we can just show all of them
@@ -126,6 +130,11 @@ export default function Projects() {
       fetchProjectss(currentTeam);
   }, [currentTeam]);
 
+  useEffect(() => {
+    fetchTasks(selectedTaskProject);
+    setUpdate(false);
+  }, [update]);
+
 
   useEffect(() => {
     if (taskCreated) {
@@ -141,11 +150,11 @@ export default function Projects() {
 
   // Function to add project to map
   function addToMap(projectName: string, projectID: string): void {
-    const updatedMap = mapProjects;
-    updatedMap.set(projectName, projectID);
-    // Update the context state with the new map
-    setMapProjects(updatedMap);
-    console.log(mapProjects);      //setMapProjects(mapProjects);
+    setMapProjects(prevMap => {
+      const updatedMap = new Map(prevMap);
+      updatedMap.set(projectName, projectID);
+      return updatedMap;
+  });     //setMapProjects(mapProjects);
   }
 
   // Event handlers for form inputs
@@ -345,50 +354,11 @@ const fetchProjectss =  async(teamName: string) => {
             initialExpandedState[project.id] = false;
         });
         setExpandedProjects(initialExpandedState);
-        console.log("hello, you");
         fetchAllUsersOnTeam(); //we need to show all the users on the team
     } catch (error) {
         console.error('Error fetching projects:', error);
     }
   };
-
-  // Function to send task creation request
-
-  // useEffect(() => {
-  //   if (selectedTeam !== "") {
-  //     // fetchProjects();
-  //   }
-  // }, [selectedTeam]);
-  
-   // Function to fetch teams
-
-  // const fetchProjects =  async() => {
-  //   console.log("gettingp projects for ", selectedTeam)
-  //   try {
-  //       mapProjects.clear();
-  //       const response = await  Axios.get(`http://localhost:8080/api/v1/project-controller/getAllProjectsForTeam/${selectedTeam}`, {
-  //           headers: {
-  //               Authorization: `Bearer ${token}`
-  //           }
-  //       });
-  //       const projects = response.data.data;
-  //       console.log(projects);
-  //       //(projects);
-  //       projects.forEach((project: Project) => {
-  //           addToMap(project.name, project.id);
-  //       });
-  //       // Update projectNamesArr after setting projects
-  //       const initialExpandedState: { [key: string]: boolean } = {};
-  //       projects.forEach((project: Project) => {
-  //           initialExpandedState[project.id] = false;
-  //       });
-  //       setExpandedProjects(initialExpandedState);
-  //       fetchAllUsersOnTeam(); //we need to show all the users on the team
-  //   } catch (error) {
-  //       console.error('Error fetching projects:', error);
-  //   }
-  // };
-
 
   // Fetch tasks for the selected project from API
   const fetchTasks = async (projName: string) => {
@@ -434,7 +404,6 @@ const fetchProjectss =  async(teamName: string) => {
     const dueTimeMs = dueDate!?.getTime();
     const difInMs = dueTimeMs - startTimeMs;
     const difInDays = difInMs / (1000 * 3600 * 24);
-
 
 
     if (endTimeInt - startTimeInt <= 60 && difInDays < 1){
@@ -530,7 +499,7 @@ return (
       <Container maxWidth="md">
         <Box sx={{ textAlign: 'center', mt: 8 }}>
           <Typography variant="h5" gutterBottom>
-            Current Teams
+            Sprint Flow Outline
           </Typography>
           {data.map((team: string, index: number) => (
             <div>
@@ -679,9 +648,6 @@ return (
        
         </Box>
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Current Projects
-          </Typography>
            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button component={Link} to="/projects/createProject" variant="contained" color="primary" sx={{ mr: 2 }}>
               Create Project
@@ -691,6 +657,10 @@ return (
             </Button>
           </Box>
         </Box>
+        <div style={{paddingBottom: "70px"}}>
+        <button onClick={handleOpen}>
+          Create Task
+        </button>
       <Modal
         open={open}
         onClose={handleClose}
@@ -709,59 +679,10 @@ return (
           boxShadow: 24,
           p: 4,
         }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" color="black" sx={{ textAlign: 'center' }}>
-            Create Task
-          </Typography>
-          <form id="form" onSubmit={sendReq}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-              <FormControl fullWidth>
-                  <InputLabel> Select Team</InputLabel>
-                  <Select value={selectedTeam} onChange={handleTeamChange} displayEmpty>
-                  {data.map((team: string, index: number) => (
-                    <MenuItem key={index} value={team}>{team}</MenuItem>
-                  ))}
-            </Select>
-                </FormControl>
-                <FormControl fullWidth>
-                  <InputLabel>Select Project</InputLabel>
-                  <Select value={selectedTaskProject} onChange={handleProjectChange}>
-                    {Array.from(mapProjects).map(([projectName, projectId]) => (
-                      <MenuItem key={projectId} value={projectName}>{projectName}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField fullWidth label="Task Name" value={taskName} onChange={handleTaskName} />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField fullWidth label="Description" value={description} onChange={handleDescription} />
-              </Grid>
-              <Grid item xs={12}>
-              Start Date:
-            <DatePicker selected={startDate} onChange={(date: Date | null) => setStartDate(date)} />
-            <TimePicker value={startTime} onChange={(e) => setStartTime(e)} clockIcon={null}/>
-            </Grid>
-            <Grid item xs={12}>
-              End Date:
-              <DatePicker selected={dueDate} onChange={(date: Date | null) => setDueDate(date)} />
-              <TimePicker value={endTime} onChange={(e) => setEndTime(e)} clockIcon={null}/>
-
-            </Grid>
-              <Grid item xs={12}>
-                <TextField fullWidth label="Points" value={points} onChange={handlePoints} type="number" />
-              </Grid>
-              <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary">
-                  Create Task
-                </Button>
-                  <p style={{color: "red"}}>{message}</p>
-              </Grid>
-            </Grid>
-          </form>
+          <CTasks UpdateCalendar = {handleTaskCreation} UpdateModal={handleClose}/>
         </Box>
       </Modal>
+      </div>
     </Container>
   </ThemeProvider>
 );
