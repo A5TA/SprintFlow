@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Axios from 'axios';
+import handleNavigates from '../services/apiServices';
 
 const theme = createTheme();
 
@@ -24,6 +25,7 @@ export default function SignUp() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {message, setMessage} = handleNavigates();
 
   const handleFirstNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFirstName(event.target.value);
@@ -44,7 +46,10 @@ export default function SignUp() {
 
  const handleSubmit = (event: any) => {
   event.preventDefault();
-  console.log("bruhv");
+  if (!email.includes("@")){
+    setMessage("Invalid Email.");
+    return;
+  }
   const bodyParameters = {
     "firstName": firstName,
     "lastName": lastName,
@@ -67,7 +72,7 @@ export default function SignUp() {
         }
       })
       .catch((error) => {
-        console.error("There was an error!", error);
+        setMessage("Error Registering. Please Try Again.")
       });
     }
   
@@ -148,6 +153,7 @@ export default function SignUp() {
                 />
               </Grid>
             </Grid>
+            <center style={{color: "red"}}>{message}</center>
             <Button
               type="submit"
               fullWidth

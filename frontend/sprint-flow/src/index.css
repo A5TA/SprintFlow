@@ -1,10 +1,18 @@
+/* Common styling for all header cells */
 .rbc-header {
   color: white;
   font-size: 14px !important;
   align-items: center;
   justify-content: center;
   height: 36px !important;
-  background: #17405d;
+  background: #8400be;
+  width: 300px;
+}
+
+/* Specific width for the custom-width header cell */
+.rbc-header.custom-width {
+  border-left: 2px solid black;
+  width: 400px !important;
 }
 
 .rbc-allday-cell {
@@ -24,12 +32,41 @@
   background-color: #eff4f7;
 }
 
-/*Event Styles*/
+/* Event Styles */
 .rbc-event,
 .rbc-background-event {
   z-index: 2;
   padding: 0px !important;
   border: none !important;
+}
+
+.rbc-agenda-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.rbc-agenda-table th,
+.rbc-agenda-table td {
+  border: 1px solid black;
+  padding: 0px;
+  text-align: center;
+}
+
+
+
+.rbc-event-title {
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 5px; /* Adjust the margin-top as needed */
+}
+
+.rbc-event-date {
+  width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rbc-event-label {
@@ -40,10 +77,26 @@
   width: 100% !important;
 }
 
-/*Timeslots Customization*/
+/* Timeslots Customization */
 .rbc-day-slot .rbc-time-slot:after {
   content: "";
   width: 100%;
   border-top: 1px solid #fbb3ec;
   display: block;
+}
+
+.input-color {
+  position: relative;
+}
+.input-color input {
+  padding-left: 20px;
+}
+.input-color .color-box {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  background-color: #ccc;
+  position: absolute;
+  left: 5px;
+  top: 5px;
 }

@@ -520,5 +520,8 @@ export default function Welcome() {
 
 </Box>
 </ThemeProvider>     
+            </Container>
+        </ThemeProvider>
+
     );
 }

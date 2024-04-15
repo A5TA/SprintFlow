@@ -21,6 +21,7 @@
     "@splinetool/runtime": "^1.0.93",
     "axios": "^1.6.8",
     "dayjs": "^1.11.10",
+    "jquery": "^3.7.1",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
     "react": "^18.2.0",
@@ -35,7 +36,8 @@
     "react-select": "^5.8.0",
     "react-select-search": "^4.1.7",
     "react-time-picker": "^6.6.0",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "toastr": "^2.1.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.56",
