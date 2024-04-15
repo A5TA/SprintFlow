@@ -23,7 +23,7 @@ const theme = createTheme();
 export default function Welcome() {
     const { handleLogout } = handleNavigates();
 
-    const scrollToSection = (id) => {
+    const scrollToSection = (id: any) => {
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: "smooth" });
@@ -520,8 +520,5 @@ export default function Welcome() {
 
 </Box>
 </ThemeProvider>     
-            </Container>
-        </ThemeProvider>
-
     );
 }
