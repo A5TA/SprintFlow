@@ -32,7 +32,7 @@ export default function Welcome() {
 
     return (
         <ThemeProvider theme={theme}>
-            <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bgcolor: 'white', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
+            <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, bgcolor: 'white', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2, borderBottom: `1px solid ${theme.palette.primary.main}` }}>
                 {/* Navigation Header */}
                 <Container sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginLeft: 20, width: '100%' }}>
                 <Typography variant="h6" color={'black'} gutterBottom fontWeight="bold" sx={{background: 'linear-gradient(45deg, #2196f3 30%, #21cbf3 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',}}>
@@ -45,8 +45,9 @@ export default function Welcome() {
                         <Button color="inherit" onClick={() => scrollToSection('services')}>Services</Button>
                         <Button color="inherit" onClick={() => scrollToSection('team')}>Team</Button>
                     </Box>
-                    <Button color="inherit" onClick={handleLogout} sx={{ whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
                 </Container>
+                <Button color="inherit" onClick={handleLogout} sx={{ mr: 10, whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
+
             </Box>
 
             {/* Content */}
@@ -241,7 +242,7 @@ export default function Welcome() {
                 Who we are
             </Typography>
             <Typography variant="body1">
-            We are Computer Science majors at Nova Southeastern University taking a Software Engineering class. For our final project, our goal was to create a valuable and accessible agile calendar for all types of workgroups. We worked on creating databases with PostgreSQL, creating a backend framework with Java Springbboot, and user-accessible frontend with React, with the use of Material UI libraries. With all this work, we have obtained this result. We hope you like it and that it is helpful!
+            We are Computer Science majors at Nova Southeastern University taking a Software Engineering class. For our final project, our goal was to create a valuable and accessible agile calendar for all types of workgroups. We worked on creating the database with PostgreSQL, creating a backend with Java Springbboot framework, and user-accessible frontend with React Typescript, and with the use of Material UI libraries. With all this work, we have obtained this result. We hope you like it and that it is helpful!
             </Typography>
         </Box>
         <Box sx={{ flexBasis: '50%', display: 'flex', justifyContent: 'center' }}>
@@ -409,7 +410,7 @@ export default function Welcome() {
         </Typography>
         {/* Description */}
         <Typography variant="body1" sx={{ maxWidth: 300 }}>
-          Database contributor.
+          Database/Backend contributor.
         </Typography>
         {/* Email */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -447,7 +448,7 @@ export default function Welcome() {
         </Typography>
         {/* Description */}
         <Typography variant="body1" sx={{ maxWidth: 300 }}>
-          Backend contributor.
+          Frontend Logic contributor.
         </Typography>
         {/* Email */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -485,7 +486,7 @@ export default function Welcome() {
         </Typography>
         {/* Description */}
         <Typography variant="body1" sx={{ maxWidth: 300 }}>
-          Frontend contributor
+          Frontend UI contributor
         </Typography>
         {/* Email */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
