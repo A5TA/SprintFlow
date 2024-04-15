@@ -58,8 +58,9 @@ function CustomAgenda({
   return (
     events.length !== 0 ? 
       <div className="custom-agenda-view">
-        {/* Render table header */}
-        <h1> HELLO </h1>
+        <center>
+        <h1 style={{color: "#8400be"}}> Agenda </h1>
+        </center>
         <table className="rbc-agenda-table">
           <thead>
             <tr>
@@ -74,12 +75,11 @@ function CustomAgenda({
         <div className="rbc-agenda-content" ref={tbodyRef}>
           <table className="rbc-agenda-table">
             <thead>
-              {/* Map over events and render day */}
               <tr>
                 <th className="rbc-header">
                   Event
                 </th>
-                <th className="rbc-header">
+                <th className="rbc-header custom-width">
                   Date
                 </th>
                 <th className="rbc-header">
@@ -97,9 +97,9 @@ function CustomAgenda({
               {events.map(event => (
                   <tr key={event.id}>
                     <td className='rbc-event-title'>{event.title}</td>
-                    <td className='rbc-event-date'> From {formatDate(event.startDate)} <br/> {formatDate(event.dueDate)}</td>
+                    <td className='rbc-event-date'> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>From</span> {formatDate(event.startDate)} <br/> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>To</span> {formatDate(event.dueDate)}</td>
                     <td className='rbc-event-title'>{event.points}</td>
-                    <td className='rbc-event-title'>{event.description}</td>
+                    <td className='rbc-event-title'><span style={{textAlign: 'left'}}>{event.description}</span></td>
                   </tr>
                 ))}
               </tbody>
