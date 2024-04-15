@@ -134,7 +134,6 @@ export default function CTasks({UpdateCalendar, UpdateModal}) {
       const handleProjectChange = (event: any) => {
         setSelectedProject(event.target.value);
       };
-    
 
     return (
       <Box sx={{
