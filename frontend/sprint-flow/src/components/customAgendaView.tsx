@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Colors } from '../services/apiServices';
 
 function CustomAgenda({
   accessors,
@@ -15,6 +16,7 @@ function CustomAgenda({
   // Refs for DOM elements
   const headerRef = useRef(null);
   const tbodyRef = useRef(null);
+  const [colors, setColors] = useState(Colors);
 
   // Adjust header width and handle overflow
   useEffect(() => {
@@ -96,7 +98,7 @@ function CustomAgenda({
               <tbody ref={tbodyRef}>
               {events.map(event => (
                   <tr key={event.id}>
-                    <td className='rbc-event-title'>{event.title}</td>
+                    <td className='rbc-event-title' style={{color: colors.get(event.projectId)?.color, fontWeight: "bolder", fontSize: "25px"}}>{event.title}</td>
                     <td className='rbc-event-date'> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>From</span> {formatDate(event.startDate)} <br/> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>To</span> {formatDate(event.dueDate)}</td>
                     <td className='rbc-event-title'>{event.points}</td>
                     <td className='rbc-event-title'><span style={{textAlign: 'left'}}>{event.description}</span></td>

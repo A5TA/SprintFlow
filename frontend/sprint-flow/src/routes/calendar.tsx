@@ -11,6 +11,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { fetchTeams } from '../services/apiServices';
 import { Project } from './projects';
+import Button from '@mui/material/Button';
 
 function App() {
   const localizer = momentLocalizer(moment);
@@ -86,10 +87,6 @@ function App() {
     }
   };
 
-  const getName = (id: string): string => {
-    return mapProjects.get(id)!.toString();
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       await fetchTeams({ token: token, setData: setTeams });
@@ -112,21 +109,37 @@ function App() {
 
   return (
     <div className="App">
-      <div style={{ paddingBottom: '70px' }}>
-        <button onClick={handleOpen}>Create Task</button>
-        {Object.entries(colors.data).map(([id, { color, isUsed }]) => {
-          if (isUsed) {
-            return (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div className="color-box" style={{ backgroundColor: color, width: '20px', height: '20px', margin: '5px' }}></div>
-                {mapProjects.size > 0 && <span>{getProjectName(id, mapProjects)}</span>}
-              </div>
+      <Button variant="contained" color="primary" onClick={handleOpen} style={{ position: 'absolute', right: "20px", top: "110px" }}>
+          Create Task
+        </Button>
+        {mapProjects.size > 0 && <h2>Key: </h2>}
+<table style={{ width: "40%", paddingBottom: '70px' }}>
+  <tbody>
+    {[...Array(4)].map((_, rowIndex) => (
+      <tr key={`row_${rowIndex}`}>
+        {[...Array(5)].map((_, colIndex) => {
+          const index = rowIndex * 4 + colIndex;
+          const colorData = Object.entries(colors.data)[index];
+          if (colorData) {
+            const [id, { color, isUsed }] = colorData;
+            return isUsed ? (
+              <td key={`cell_${index}`} style={{ backgroundColor: color, textAlign: "center", color: "white", fontWeight: "bold", width: "10%" }}>
+                {getProjectName(id, mapProjects)}
+              </td>
+            ) : (
+              <td key={`cell_${index}`} />
             );
           } else {
-            return null; // or any other component if not used
+            // If there is no more data, fill the cell with an empty one
+            return <td key={`cell_${index}`} />;
           }
         })}
-      </div>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -171,6 +184,7 @@ function App() {
       />
     </div>
   );
+  
 }
 
 export default App;
