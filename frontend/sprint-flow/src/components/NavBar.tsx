@@ -1,11 +1,11 @@
-import { AppBar, Box, Button, Container, Toolbar, Typography, createTheme } from "@mui/material"
+import { AppBar, Avatar, Box, Button, Container, Toolbar, Typography, createTheme } from "@mui/material"
 import handleNavigates from "../services/apiServices";
+import CustomAvatar from "./CustomAvatar";
 
 const theme = createTheme();
 
 const NavBar = () => {
     const { handleLogout, handleNavigate} = handleNavigates();
-
   return (
       <Box sx={{ position: 'relative', top: 0, left: 0, right: 0, bgcolor: 'white', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', py: 1.5, borderBottom: `1px solid ${theme.palette.primary.main}`}}>
                 {/* Navigation Header */}
@@ -19,8 +19,11 @@ const NavBar = () => {
                         <Button color="inherit" onClick={() => handleNavigate("/projects")}>Projects</Button>
                     </Box>
                 </Container>
-                <Button color="inherit" onClick={handleLogout} sx={{ mr: 10, whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
-
+                <Container sx={{ display: 'flex', justifyContent: 'right', gap: '3rem'}}>
+                    <CustomAvatar />
+                    <Button color="inherit" onClick={handleLogout} sx={{ mr: 10, whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
+                </Container>
+                
             </Box>
   )
 }
