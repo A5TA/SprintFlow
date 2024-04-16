@@ -17,6 +17,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import CustomAvatar from '../components/CustomAvatar';
 
 const theme = createTheme();
 
@@ -46,7 +47,10 @@ export default function Welcome() {
                         <Button color="inherit" onClick={() => scrollToSection('team')}>Team</Button>
                     </Box>
                 </Container>
-                <Button color="inherit" onClick={handleLogout} sx={{ mr: 10, whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
+                <Container sx={{ display: 'flex', justifyContent: 'right', gap: '3rem'}}>
+                    <CustomAvatar />
+                    <Button color="inherit" onClick={handleLogout} sx={{ mr: 10, whiteSpace: 'nowrap', border: `1px solid ${theme.palette.primary.main}`, borderRadius: '5px', padding: '5px 10px', '&:hover': { backgroundColor: theme.palette.primary.main, color: 'white' } }}>Logout</Button>
+                </Container>
 
             </Box>
 
