@@ -244,16 +244,6 @@ export default function Projects() {
     setDescription(event.target.value);
   };
 
-
-  // const handleProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setProjectName(event.target.value);
-  // };
-
-  // const handleProjectName = (event: any) => {
-  //   setProjectName(event.target.value);
-  // };
-
-
   const handleTaskName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTaskName(event.target.value);
   };
