@@ -238,20 +238,6 @@ export default function Projects() {
     setEditingTaskId(null);
   };
 
-  // Function to cancel editing
-
-  const handleDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDescription(event.target.value);
-  };
-
-  const handleTaskName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTaskName(event.target.value);
-  };
-
-  const handlePoints = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPoints(event.target.value);
-  };
-
   // Function to toggle project expansion and fetch tasks if necessary
   const toggleProject = async (project: Project) => {
     const projectId = project.id;

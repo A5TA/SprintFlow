@@ -16,7 +16,6 @@ function CustomAgenda({
   // Refs for DOM elements
   const headerRef = useRef(null);
   const tbodyRef = useRef(null);
-  const [colors, setColors] = useState(Colors);
 
   // Adjust header width and handle overflow
   useEffect(() => {
