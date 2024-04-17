@@ -92,9 +92,9 @@ const joinTeam = () => {
     return (
     <Box sx={{ textAlign: 'center', mt: 4 }}>
       <div style={{position: 'absolute', top: 20, right: 20 }}>
-        <button onClick={() => handleNavigate("/projects")}>
+      <Button variant="contained" color="primary" onClick={() => handleNavigate("/projects")} style={{ position: 'absolute', right: "20px", top: "30px" }}>
           Projects
-        </button>
+        </Button>
       </div>
       <Typography variant="h4" gutterBottom sx={{ fontFamily: 'Roboto', mb: 2 }}>
         Join a Team

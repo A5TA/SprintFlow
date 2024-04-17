@@ -5,7 +5,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Axios from 'axios';
 import CTasks from './tasks';
 import '../index.css';
-import { Colors } from '../services/apiServices';
+import { Colors, getColorById } from '../services/apiServices';
 import CustomAgenda from '../components/customAgendaView';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -20,7 +20,6 @@ function App() {
   const [teams, setTeams] = useState<string[]>([]);
   const [update, setUpdate] = useState(false);
   const [open, setOpen] = useState(false);
-  const [colors, setColors] = useState(Colors);
   const [mapProjects, setMapProjects] = useState(new Map<string, string>());
 
   const handleTaskCreation = () => {
@@ -63,7 +62,7 @@ function App() {
     };
 
     fetchAllProjects();
-  }, [teams, token]);
+  }, [teams]);
 
   const fetchTasks = async () => {
     try {
@@ -97,7 +96,11 @@ function App() {
   useEffect(() => {
     fetchTasks();
     setUpdate(false);
-  }, [update, token]);
+  }, [update]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   function getProjectName(id: string, mapProjects: Map<string, string>): string | undefined {
     for (const [projectName, projectId] of mapProjects) {
@@ -109,37 +112,28 @@ function App() {
 
   return (
     <div className="App">
-      <Button variant="contained" color="primary" onClick={handleOpen} style={{ position: 'absolute', right: "20px", top: "110px" }}>
+      <div style={{paddingBottom: "70px"}}>
+      <Button variant="contained" color="primary" onClick={handleOpen} style={{ position: 'absolute', right: "20px", top: "80px" }}>
           Create Task
         </Button>
-        {mapProjects.size > 0 && <h2>Key: </h2>}
-<table style={{ width: "40%", paddingBottom: '70px' }}>
-  <tbody>
-    {[...Array(4)].map((_, rowIndex) => (
-      <tr key={`row_${rowIndex}`}>
-        {[...Array(5)].map((_, colIndex) => {
-          const index = rowIndex * 4 + colIndex;
-          const colorData = Object.entries(colors.data)[index];
-          if (colorData) {
-            const [id, { color, isUsed }] = colorData;
-            return isUsed ? (
-              <td key={`cell_${index}`} style={{ backgroundColor: color, textAlign: "center", color: "white", fontWeight: "bold", width: "10%" }}>
-                {getProjectName(id, mapProjects)}
-              </td>
-            ) : (
-              <td key={`cell_${index}`} />
-            );
-          } else {
-            // If there is no more data, fill the cell with an empty one
-            return <td key={`cell_${index}`} />;
-          }
-        })}
-      </tr>
-    ))}
-  </tbody>
-</table>
 
-
+        {tasks.length > 0 &&  
+  <div style={{paddingTop: 0}}>
+    <h1>Projects</h1>
+    <table>
+      {Array.from({length: Math.ceil(tasks.length / 4)}).map((_, rowIndex) => (
+        <tr key={rowIndex}>
+          {tasks.slice(rowIndex * 4, (rowIndex + 1) * 4).map((task, index) => (
+            <td key={rowIndex * 4 + index} style={{backgroundColor: getColorById(task.projectId), color: "white", fontWeight: "bolder", width: 150, textAlign: "center"}}>
+              {getProjectName(task.projectId, mapProjects)}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </table>
+  </div>
+}
+      </div>
       <Modal
         open={open}
         onClose={handleClose}
@@ -177,8 +171,8 @@ function App() {
         style={{ height: 840, width: 1450 }}
         eventPropGetter={(event) => {
           const projId = event.projectId;
-          const backgroundColor = colors.get(projId)?.color;
-          colors.setUsed(projId, true);
+          console.log(getProjectName(projId, mapProjects));
+          const backgroundColor = getColorById(projId);
           return { style: { backgroundColor } };
         }}
       />

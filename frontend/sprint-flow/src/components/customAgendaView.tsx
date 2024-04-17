@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Colors } from '../services/apiServices';
+import { Colors, getColorById } from '../services/apiServices';
 
 function CustomAgenda({
   accessors,
@@ -98,7 +98,7 @@ function CustomAgenda({
               <tbody ref={tbodyRef}>
               {events.map(event => (
                   <tr key={event.id}>
-                    <td className='rbc-event-title' style={{color: colors.get(event.projectId)?.color, fontWeight: "bolder", fontSize: "25px"}}>{event.title}</td>
+                    <td className='rbc-event-title' style={{color: getColorById(event.projectId), fontWeight: "bolder", fontSize: "25px"}}>{event.title}</td>
                     <td className='rbc-event-date'> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>From</span> {formatDate(event.startDate)} <br/> <span style={{color: "#ca4800", fontWeight: "bolder", fontSize: 21}}>To</span> {formatDate(event.dueDate)}</td>
                     <td className='rbc-event-title'>{event.points}</td>
                     <td className='rbc-event-title'><span style={{textAlign: 'left'}}>{event.description}</span></td>
@@ -110,7 +110,7 @@ function CustomAgenda({
         </div>
       </div>
     : (
-      <span className="rbc-agenda-empty"> <p> No events in range</p></span>
+      <span style={{fontSize: 30, textAlign: "center", fontWeight: "bold", color: "blueviolet" }}className="rbc-agenda-empty"> <p> You Have No Tasks!</p></span>
     )
   );  
 }
