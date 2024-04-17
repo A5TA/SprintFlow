@@ -57,10 +57,10 @@ export default function CTeam() {
             alignItems: 'center',
           }}
         >
-      <div style={{position: 'absolute', top: 20, right: 20 }}>
-        <button onClick={() => handleNavigate("/projects")}>
+      <div>
+      <Button variant="contained" color="primary" onClick={() => handleNavigate("/projects")} style={{ position: 'absolute', right: "20px", top: "30px" }}>
           Projects
-        </button>
+        </Button>
       </div>
           <Typography component="h1" variant="h5">
             Enter the name of your team
