@@ -123,7 +123,11 @@ function App() {
     <table>
       {Array.from({length: Math.ceil(tasks.length / 4)}).map((_, rowIndex) => (
         <tr key={rowIndex}>
-          {tasks.slice(rowIndex * 4, (rowIndex + 1) * 4).map((task, index) => (
+          {tasks.filter((task, index, self) => 
+            index === self.findIndex(t => t.projectId === task.projectId)
+          ) 
+          .slice(rowIndex * 4, (rowIndex + 1) * 4).map((task, index) => (
+            
             <td key={rowIndex * 4 + index} style={{backgroundColor: getColorById(task.projectId), color: "white", fontWeight: "bolder", width: 150, textAlign: "center"}}>
               {getProjectName(task.projectId, mapProjects)}
             </td>
@@ -171,7 +175,6 @@ function App() {
         style={{ height: 840, width: 1450 }}
         eventPropGetter={(event) => {
           const projId = event.projectId;
-          console.log(getProjectName(projId, mapProjects));
           const backgroundColor = getColorById(projId);
           return { style: { backgroundColor } };
         }}

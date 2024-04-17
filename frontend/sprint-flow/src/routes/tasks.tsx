@@ -95,6 +95,23 @@ export default function CTasks({UpdateCalendar, UpdateModal}) {
         const javaDueDate = dueDate ? new Date(dueDate.toISOString().split('T')[0] + 'T' + endTime) : null;
         const pointsInt = parseInt(points, 10);
 
+        var [startHours, startMins] = startTime.split(":");
+    var [endHours, endMins] = endTime.split(":");
+
+    const startTimeInt = (parseInt(startHours) * 60) + parseInt(startMins);
+    const endTimeInt = (parseInt(endHours) * 60) + parseInt(endMins);
+
+    const startTimeMs = startDate!?.getTime();
+    const dueTimeMs = dueDate!?.getTime();
+    const difInMs = dueTimeMs - startTimeMs;
+    const difInDays = difInMs / (1000 * 3600 * 24);
+
+
+    if (endTimeInt - startTimeInt <= 60 && difInDays < 1){
+      setMessage("Task needs to be longer than 1 hour");
+      return;
+    }
+
         const bodyParameters = {
             "name": taskName,
             "desc": description,
